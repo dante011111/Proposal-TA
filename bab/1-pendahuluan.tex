@@ -47,13 +47,19 @@ Berdasarkan rumusan masalah, tujuan dari penelitian ini adalah sebagai berikut:
 \end{enumerate}
 
 \section{Manfaat}
-\label{sec:Manfaat}
+\label{sec:manfaat}
 
-Manfaat dari penelitian adalah sebagai berikut:
+\subsection{Bagi Peneliti}
+\label{sec:manfaat_peneliti}
 
 \begin{enumerate}
-  \item Topologi Sistem: Perancangan arsitektur \emph{Active Noise Cancellation} (ANC) dibatasi pada sistem \emph{Feedforward Single-Channel} (SISO - \emph{Single-Input Single-Output}), yang merepresentasikan model pemrosesan akustik untuk satu sisi \emph{earpiece} pada \emph{headphone}.
-  \item Cakupan Algoritma: Algoritma filter adaptif yang diimplementasikan dan dikomparasikan secara eksklusif hanya algoritma \emph{Filtered-X Least Mean Square} (FXLMS) standar dengan \emph{step-size} tetap dan \emph{Filtered-X Normalized Least Mean Square} (FXNLMS) dengan \emph{step-size} ternormalisasi.
-  \item Karakteristik Sinyal Bising: Sinyal referensi atau gangguan yang dievaluasi difokuskan pada kebisingan spektrum lebar (\emph{broadband noise}) pada pita frekuensi rendah (rentang frekuensi di bawah 1000 Hz--2000 Hz). Sinyal uji direpresentasikan menggunakan \emph{white noise}, \emph{pink noise}, atau rekaman bising lingkungan nyata (\emph{real-world ambient noise}).
-  \item Metrik Evaluasi Kinerja dan Efisiensi: Evaluasi kinerja dibatasi pada metrik peredaman kebisingan (\emph{noise reduction}) yang diukur dalam SNR (\emph{Signal-to-Noise Ratio}), kecepatan konvergensi, dan \emph{steady-state error} hasil simulasi. Evaluasi efisiensi komputasi dibatasi pada kompleksitas operasi aritmetika per-iterasi serta metrik sintesis logika pada platform \emph{Field-Programmable Gate Array} (FPGA), yaitu utilisasi sumber daya (LUT, \emph{Flip-Flop}, memori, dan DSP \emph{Slices}).
+  \item Meningkatkan pemahaman dan keterampilan dalam perancangan sistem \emph{Active Noise Cancellation} (ANC), khususnya algoritma filter adaptif FXLMS dan FXNLMS, aritmetika \emph{fixed-point}, serta implementasi dan sintesis HDL pada FPGA.
+  \item Menerapkan pengetahuan yang diperoleh selama pendidikan sarjana pada bidang pengolahan sinyal digital dan rekayasa elektronika.
+\end{enumerate}
+
+\subsection{Bagi Masyarakat Umum}
+\label{sec:manfaat_masyarakat}
+
+\begin{enumerate}
+  \item Memberikan kontribusi pengetahuan mengenai perbandingan kinerja dan efisiensi komputasi algoritma FXLMS dan FXNLMS pada sistem ANC \emph{headphone} berbasis FPGA, sebagai dasar kuantitatif dalam memilih algoritma ANC untuk perangkat tersemat berkapasitas terbatas.
 \end{enumerate}
