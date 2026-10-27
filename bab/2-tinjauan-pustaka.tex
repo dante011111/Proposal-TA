@@ -69,11 +69,11 @@ Terdapat tiga topologi utama sistem ANC, yaitu:
   \item \emph{Hybrid} ANC menggabungkan \emph{feedforward} dan \emph{feedback} untuk memperoleh reduksi yang lebih luas, terutama pada \emph{noise} yang sebagian dapat diprediksi dan sebagian tidak dapat diprediksi. Namun, topologi ini membutuhkan lebih banyak sensor, aktuator, dan kompleksitas kendali \parencite{kuo1999,miyake2023}.
 \end{enumerate}
 
-Penelitian ini memilih topologi \emph{feedforward Single-Input Single-Output} (SISO) karena sesuai dengan konfigurasi \emph{headphone} sederhana. Satu mikrofon referensi ditempatkan pada bagian luar \emph{earcup} untuk menangkap \emph{noise} lingkungan, satu mikrofon \emph{error} ditempatkan di dalam \emph{earcup} untuk mengukur sinyal residual, dan satu \emph{speaker} digunakan sebagai aktuator penghasil \emph{anti-noise}. Konfigurasi ini hanya membutuhkan satu jalur pemrosesan utama sehingga lebih efisien untuk diimplementasikan pada FPGA dengan sumber daya terbatas \parencite{shi2016,miyake2023}.
+Sistem ANC \emph{feedforward Single-Input Single-Output} (SISO) pada \emph{headphone} terdiri atas satu mikrofon referensi pada bagian luar \emph{earcup} untuk menangkap \emph{noise} lingkungan, satu mikrofon \emph{error} di dalam \emph{earcup} untuk mengukur sinyal residual, dan satu \emph{speaker} sebagai aktuator penghasil \emph{anti-noise}. Konfigurasi ini hanya membutuhkan satu jalur pemrosesan utama \parencite{shi2016,miyake2023}.
 
-Pemilihan \emph{feedforward} juga didasarkan pada aspek kausalitas. Pada sistem \emph{feedforward}, mikrofon referensi harus menerima \emph{noise} lebih awal daripada mikrofon \emph{error}. Waktu rambat akustik dari mikrofon referensi ke mikrofon \emph{error} memberikan margin waktu bagi FPGA untuk melakukan akuisisi data, komputasi filter adaptif, dan pengiriman sinyal ke DAC. Jika total latensi digital melebihi \emph{delay} akustik tersebut, \emph{anti-noise} tiba setelah \emph{noise} primer sehingga interferensi destruktif tidak lagi efektif \parencite{kuo1999,shi2016}.
+Sistem ANC \emph{feedforward} memiliki kendala kausalitas. Mikrofon referensi harus menerima \emph{noise} lebih awal daripada mikrofon \emph{error}. Waktu rambat akustik dari mikrofon referensi ke mikrofon \emph{error} memberikan margin waktu bagi pemroses digital untuk melakukan akuisisi data, komputasi filter adaptif, dan pengiriman sinyal ke DAC. Jika total latensi digital melebihi \emph{delay} akustik tersebut, \emph{anti-noise} tiba setelah \emph{noise} primer sehingga interferensi destruktif tidak lagi efektif \parencite{kuo1999,shi2016}.
 
-Topologi \emph{feedback} dan \emph{hybrid} tetap relevan sebagai pembanding. \emph{Feedback} ANC dapat meredam komponen \emph{noise} periodik yang dapat diprediksi, tetapi lebih sensitif terhadap umpan balik akustik dan berpotensi menimbulkan osilasi. \emph{Hybrid} ANC memberikan performa lebih baik pada kondisi tertentu, tetapi tidak dipilih karena kebutuhan perangkat keras dan kompleksitas algoritmanya lebih tinggi \parencite{kuo1999,klemd2021}.
+Masing-masing topologi memiliki karakteristik yang berbeda. \emph{Feedback} ANC dapat meredam komponen \emph{noise} periodik yang dapat diprediksi, tetapi lebih sensitif terhadap umpan balik akustik dan berpotensi menimbulkan osilasi. \emph{Hybrid} ANC dapat memberikan reduksi yang lebih baik pada kondisi tertentu, tetapi membutuhkan perangkat keras dan algoritma dengan kompleksitas yang lebih tinggi \parencite{kuo1999,klemd2021}.
 
 \subsection{Filter Adaptif dan Algoritma LMS}
 \label{sec:lms}
@@ -171,7 +171,7 @@ Syarat kestabilan FXLMS secara umum dapat dinyatakan sebagai:
 
 dengan $P_{x'}$ adalah daya sinyal referensi terfilter dan $L$ adalah panjang filter adaptif. Persamaan ini memperlihatkan bahwa nilai $\mu$ yang aman bergantung pada daya sinyal. Bila daya $x'(n)$ meningkat, $\mu$ harus diperkecil agar pembaruan koefisien tetap stabil. Sebaliknya, saat daya sinyal menurun, nilai $\mu$ yang tetap menyebabkan konvergensi menjadi lambat \parencite{cesur2025,kuo1999,pang2024}.
 
-Kelemahan utama FXLMS adalah penggunaan \emph{step-size} tetap. Pada lingkungan dengan variasi level \emph{noise} yang besar, misalnya saat pengguna berpindah dari ruangan sunyi ke lingkungan lalu lintas, FXLMS dapat kehilangan keseimbangan antara kecepatan adaptasi dan kestabilan. Oleh karena itu, diperlukan normalisasi \emph{step-size} terhadap daya sinyal referensi \parencite{cesur2025,pang2024}.
+Kelemahan utama FXLMS adalah penggunaan \emph{step-size} tetap. Pada lingkungan dengan variasi level \emph{noise} yang besar, misalnya saat pengguna berpindah dari ruangan sunyi ke lingkungan lalu lintas, FXLMS dapat kehilangan keseimbangan antara kecepatan adaptasi dan kestabilan. Keterbatasan ini dapat diatasi dengan menormalisasi \emph{step-size} terhadap daya sinyal referensi \parencite{cesur2025,pang2024}.
 
 \subsection{Algoritma FXNLMS}
 \label{sec:fxnlms}
@@ -222,8 +222,6 @@ Dari sisi implementasi FPGA, FXNLMS menambahkan operasi pembagian atau perkalian
   \end{tabular}
 \end{table}
 
-Berdasarkan perbandingan tersebut, FXLMS cocok untuk implementasi awal yang menekankan efisiensi perangkat keras, sedangkan FXNLMS lebih sesuai bila lingkungan \emph{noise} memiliki variasi amplitudo yang signifikan \parencite{cesur2025,shi2016,pang2024}.
-
 \subsection{Representasi \emph{Fixed-Point}}
 \label{sec:fixedpoint}
 
@@ -247,7 +245,7 @@ Proses kuantisasi menyebabkan galat karena nilai kontinu atau hasil perhitungan 
 
 Pada filter adaptif, presisi terbatas memiliki dampak yang lebih serius dibanding filter statis. Pertama, galat kuantisasi pada $e(n)$, $x'(n)$, dan $\mu$ menyebabkan arah pembaruan koefisien menjadi tidak sempurna. Kedua, jika nilai $\mu\,e(n)\,x'(n)$ lebih kecil daripada resolusi koefisien, hasil penjumlahan tidak mengubah nilai koefisien. Kondisi ini disebut \emph{coefficient stalling} atau berhentinya pembaruan koefisien. Akibatnya, filter tidak dapat mencapai solusi optimum meskipun secara matematis algoritma seharusnya masih beradaptasi \parencite{shi2016,klemd2021}.
 
-\emph{Fixed-point} dipilih dibanding \emph{floating-point} karena FPGA Artix-7 memiliki DSP \emph{slice} yang dioptimasi untuk operasi MAC \emph{fixed-point}. \emph{Floating-point} membutuhkan lebih banyak LUT, register, dan \emph{pipeline} sehingga meningkatkan penggunaan sumber daya serta konsumsi daya. Untuk sistem ANC \emph{headphone} dengan kebutuhan \emph{real-time} dan latensi rendah, \emph{fixed-point} memberikan keseimbangan yang lebih baik antara akurasi, kecepatan, dan efisiensi perangkat keras \parencite{klemd2021,ji2025,amd_ds181}.
+Pada FPGA seperti Artix-7, DSP \emph{slice} dioptimasi untuk operasi MAC \emph{fixed-point}. Aritmetika \emph{floating-point} membutuhkan lebih banyak LUT, register, dan \emph{pipeline} sehingga penggunaan sumber daya dan konsumsi dayanya lebih besar dibanding \emph{fixed-point} \parencite{klemd2021,ji2025,amd_ds181}.
 
 \subsection{\emph{Field-Programmable Gate Array} (FPGA)}
 \label{sec:fpga}
@@ -263,7 +261,7 @@ Elemen dasar FPGA meliputi:
   \item \emph{Block RAM} (BRAM): menyimpan \emph{delay line} filter, koefisien adaptif, \emph{buffer} I2S, dan data internal lainnya \parencite{amd_ds181,digilent_arty}.
 \end{enumerate}
 
-Perangkat yang digunakan adalah Artix-7 XC7A35T pada \emph{board} Arty A7-35T. FPGA ini memiliki 5.200 \emph{slice}, 41.600 \emph{flip-flop}, 1.800 Kbit \emph{block RAM}, dan 90 DSP \emph{slice}. Setiap \emph{slice} terdiri atas empat LUT enam-\emph{input} dan delapan \emph{flip-flop}. Spesifikasi tersebut memadai untuk implementasi filter FIR adaptif berukuran sedang, kontrol I2S, serta pemrosesan FXLMS atau FXNLMS secara \emph{real-time} \parencite{amd_ds181,digilent_arty}.
+Artix-7 XC7A35T, yang terdapat pada \emph{board} Arty A7-35T, memiliki 5.200 \emph{slice}, 41.600 \emph{flip-flop}, 1.800 Kbit \emph{block RAM}, dan 90 DSP \emph{slice}. Setiap \emph{slice} terdiri atas empat LUT enam-\emph{input} dan delapan \emph{flip-flop} \parencite{amd_ds181,digilent_arty}.
 
 DSP \emph{slice} menjadi komponen utama dalam implementasi filter adaptif karena operasi FXLMS didominasi oleh perkalian koefisien dengan sampel sinyal dan akumulasi hasil perkalian. BRAM digunakan untuk menyimpan \emph{delay line} $x(n)$ dan $x'(n)$, sedangkan register \emph{flip-flop} menyimpan koefisien $w(n)$, sinyal \emph{error}, dan sinyal kendali \emph{pipeline}. Pembagian pada FXNLMS dapat diimplementasikan menggunakan LUT, blok \emph{reciprocal}, atau modul pembagi yang di-\emph{pipeline} \parencite{shi2016,klemd2021}.
 
@@ -280,9 +278,9 @@ Alur perancangan HDL dimulai dengan penulisan deskripsi perangkat keras mengguna
   \item SD atau DOUT/DIN: jalur data serial yang membawa sampel audio \parencite{pinardi2022,invensense_inmp441}.
 \end{enumerate}
 
-Pada sistem ini, INMP441 berfungsi sebagai mikrofon MEMS digital dengan keluaran I2S. Modul ini menghasilkan data PCM 24-bit dan mendukung frekuensi \emph{sampling} sekitar 8 kHz hingga 48 kHz. FPGA berperan sebagai I2S \emph{master} yang menghasilkan SCK dan WS, kemudian menerima data audio dari INMP441 melalui jalur SD. Data tersebut diubah menjadi sinyal referensi $x(n)$ yang digunakan oleh filter adaptif \parencite{pinardi2022,invensense_inmp441}.
+INMP441 adalah mikrofon MEMS digital dengan keluaran I2S. Mikrofon ini menghasilkan data PCM 24-bit dan mendukung frekuensi \emph{sampling} sekitar 8 kHz hingga 48 kHz. INMP441 bekerja sebagai I2S \emph{slave}, sehingga sinyal SCK dan WS dibangkitkan oleh perangkat \emph{master}, sedangkan data audio dikirim melalui jalur SD \parencite{pinardi2022,invensense_inmp441}.
 
-PCM5102A berperan sebagai DAC audio yang menerima data digital dari FPGA melalui I2S dan mengubahnya menjadi sinyal analog untuk \emph{speaker}. Keluaran FPGA berupa sinyal \emph{anti-noise} $y(n)$ dikirim ke PCM5102A, kemudian diubah menjadi gelombang akustik oleh \emph{speaker} di dalam \emph{earcup}. Mikrofon \emph{error} di dalam \emph{earcup} kemudian mengukur sinyal residual $e(n)$ yang digunakan untuk memperbarui koefisien filter adaptif \parencite{ji2025,ti_pcm5102a}.
+PCM5102A adalah DAC audio yang menerima data digital melalui I2S dan mengubahnya menjadi sinyal analog \parencite{ji2025,ti_pcm5102a}.
 
 Frekuensi \emph{sampling} menentukan waktu yang tersedia untuk memproses satu sampel. Periode \emph{sampling} adalah:
 
