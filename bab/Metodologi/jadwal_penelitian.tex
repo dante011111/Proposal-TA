@@ -1,0 +1,42 @@
+Penelitian direncanakan berlangsung selama enam bulan. Rincian kegiatan dan alokasi waktunya disajikan pada Tabel~\ref{tbl:timeline}.
+
+\newcommand{\G}{\cellcolor{green}}   % 50% green, lighter
+\newcommand{\B}{\cellcolor{blue!70}}    % light blue
+\newcommand{\Y}{\cellcolor{yellow}}  % softer yellow
+\begin{table}[H]
+  \centering
+  \caption{Jadwal Pelaksanaan}
+  \label{tbl:timeline}
+  \renewcommand{\arraystretch}{1.3}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{|c|p{6cm}|c|c|c|c|c|c|}
+  \hline
+  \textbf{No.} & \textbf{Jenis Kegiatan} & \textbf{Bulan 1} & \textbf{Bulan 2} & \textbf{Bulan 3} & \textbf{Bulan 4} & \textbf{Bulan 5} & \textbf{Bulan 6} \\
+  \hline
+  1 & Identifikasi masalah & \B &  &  &  &  &  \\
+  \hline
+  2 & Studi literatur & \B & \B &  &  &  &  \\
+  \hline
+  3 & Perancangan model sistem ANC dan skenario uji &  & \B &  &  &  &  \\
+  \hline
+  4 & Implementasi algoritma FXLMS dan FXNLMS pada simulasi &  & \B & \G &  &  &  \\
+  \hline
+  5 & Simulasi dan evaluasi kinerja peredaman &  &  & \G &  &  &  \\
+  \hline
+  6 & Analisis pengaruh normalisasi \emph{step-size} &  &  & \G & \G &  &  \\
+  \hline
+  7 & Perancangan dan implementasi algoritma pada FPGA &  &  &  & \G & \Y &  \\
+  \hline
+  8 & Sintesis dan evaluasi utilisasi sumber daya &  &  &  &  & \Y &  \\
+  \hline
+  9 & Pengujian prototipe dan pengukuran peredaman &  &  &  &  & \Y & \Y \\
+  \hline
+  10 & Perbandingan efisiensi komputasi FXLMS dan FXNLMS &  &  &  &  & \Y & \Y \\
+  \hline
+  11 & Analisis akhir &  &  &  &  & \Y & \Y \\
+  \hline
+  12 & Pembuatan laporan &  &  &  &  & \Y & \Y \\
+  \hline
+  \end{tabular}
+  } % akhir resizebox
+\end{table}

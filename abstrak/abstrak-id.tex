@@ -1,0 +1,25 @@
+\begin{center}
+  \large\textbf{ABSTRAK}
+\end{center}
+
+\addcontentsline{toc}{chapter}{ABSTRAK}
+
+\vspace{2ex}
+
+\begingroup
+% Menghilangkan padding
+\setlength{\tabcolsep}{0pt}
+
+\noindent
+\begin{tabularx}{\textwidth}{l >{\centering}m{2em} X}
+  Nama Mahasiswa    & : & \name{}         \\
+
+  Judul Tugas Akhir & : & \tatitle{}      \\
+
+  Pembimbing        & : & 1. \advisor{}   \\
+\end{tabularx}
+\endgroup
+
+\emph{Active Noise Cancellation} (ANC) digunakan untuk meredam kebisingan frekuensi rendah yang tidak dapat diatasi secara efektif oleh peredam pasif. Algoritma \emph{Filtered-X Least Mean Square} (FXLMS) menjadi standar pada sistem ANC, tetapi \emph{step-size} yang tetap membuat kinerjanya bergantung pada \emph{tuning} manual dan rentan terhadap variasi daya sinyal kebisingan \emph{broadband}. \emph{Filtered-X Normalized Least Mean Square} (FXNLMS) mengatasi kelemahan tersebut dengan menormalisasi \emph{step-size} terhadap daya sinyal referensi terfilter, tetapi menambah estimasi daya dan operasi pembagian pada setiap iterasi. Penelitian terdahulu umumnya hanya menyoroti kinerja peredaman atau efisiensi perangkat keras secara terpisah, sehingga belum diketahui apakah keunggulan FXNLMS sepadan dengan biaya komputasi tambahannya. Penelitian ini membandingkan FXLMS dan FXNLMS pada sistem ANC \emph{headphone feedforward single-channel} (SISO) melalui tiga tahap, yaitu simulasi kinerja peredaman menggunakan \emph{white noise}, \emph{pink noise}, dan rekaman bising lingkungan nyata; analisis pengaruh normalisasi \emph{step-size} terhadap kecepatan konvergensi dan \emph{steady-state error}; serta implementasi \emph{fixed-point} pada FPGA Artix-7 XC7A35T. Kinerja dievaluasi melalui peredaman kebisingan (SNR), kecepatan konvergensi, dan \emph{steady-state error}, sedangkan efisiensi komputasi dievaluasi melalui kompleksitas operasi per-iterasi serta utilisasi LUT, \emph{flip-flop}, memori, dan DSP \emph{slice}. Hasil penelitian diharapkan memberikan dasar kuantitatif dalam memilih algoritma ANC untuk perangkat tersemat berkapasitas terbatas.
+
+Kata Kunci: \emph{Active Noise Cancellation}, FXLMS, FXNLMS, FPGA, Efisiensi Komputasi

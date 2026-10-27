@@ -1,0 +1,71 @@
+Urutan pelaksanaan penelitian ini digambarkan melalui diagram alir pada Gambar~\ref{fig:diagram_alir}. Penelitian dimulai dari identifikasi masalah dan studi literatur, dilanjutkan dengan perancangan model sistem ANC dan simulasi kedua algoritma, kemudian analisis pengaruh normalisasi \emph{step-size}. Setelah hasil simulasi dinilai memadai, penelitian dilanjutkan dengan analisis kompleksitas operasi, implementasi pada FPGA, dan verifikasi pada prototipe, lalu diakhiri dengan analisis akhir dan penyusunan laporan.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      node distance=4.5mm,
+      proses/.style={rectangle, draw, rounded corners=1pt, align=center,
+                     text width=5.6cm, minimum height=8mm, inner sep=2pt,
+                     execute at begin node={\hyphenpenalty=10000}},
+      terminal/.style={ellipse, draw, minimum width=18mm, minimum height=6.5mm, inner sep=1pt},
+      keputusan/.style={diamond, draw, aspect=2.2, align=center, inner sep=1pt},
+      tahap/.style={draw, dashed, gray, rounded corners=2pt, inner sep=2.5mm},
+      label tahap/.style={font=\scriptsize, text=gray!70!black, inner sep=1pt},
+      panah/.style={-latex, thick},
+    ]
+
+    % ---------------- Kolom kiri ----------------
+    \node[terminal] (mulai) {Mulai};
+    \node[proses, below=of mulai] (studi) {Identifikasi masalah dan studi literatur};
+    \node[proses, below=of studi] (model) {Perancangan model ANC SISO dan skenario uji};
+    \node[proses, below=10mm of model] (impl) {Implementasi FXLMS dan FXNLMS pada simulasi};
+    \node[proses, below=of impl] (sim) {Simulasi pada \emph{white noise}, \emph{pink noise}, dan bising nyata};
+    \node[proses, below=of sim] (eval) {Evaluasi SNR, konvergensi, dan \emph{steady-state error}};
+    \node[keputusan, below=of eval] (cek) {Hasil\\memadai?};
+
+    % ---------------- Kolom kanan ----------------
+    \node[proses, right=17mm of studi] (norm) {Analisis pengaruh normalisasi \emph{step-size}};
+    \node[proses, below=10mm of norm] (komp) {Analisis kompleksitas operasi per iterasi};
+    \node[proses, below=of komp] (hdl) {Perancangan HDL \mbox{\emph{fixed-point}} dan sintesis FPGA};
+    \node[proses, below=of hdl] (util) {Evaluasi utilisasi LUT, FF, memori, dan DSP};
+    \node[proses, below=of util] (verif) {Verifikasi pada prototipe ANC \emph{headphone}};
+    \node[proses, below=7mm of verif] (banding) {\textbf{Perbandingan kinerja dan efisiensi komputasi}};
+    \node[proses, below=of banding] (lapor) {Analisis akhir dan pembuatan laporan};
+    \node[terminal, below=of lapor] (selesai) {Selesai};
+
+    % ---------------- Kelompok tahap ----------------
+    \node[tahap, fit=(impl)(cek)] (t1) {};
+    \node[tahap, fit=(norm)] (t2) {};
+    \node[tahap, fit=(komp)(verif)] (t3) {};
+    \node[label tahap, anchor=south west] at (t1.north west) {\textbf{Tahap 1} (3.1.1)};
+    \node[label tahap, anchor=south west] at (t2.north west) {\textbf{Tahap 2} (3.1.2)};
+    \node[label tahap, anchor=south west] at (t3.north west) {\textbf{Tahap 3} (3.1.3)};
+
+    % ---------------- Alur ----------------
+    \draw[panah] (mulai) -- (studi);
+    \draw[panah] (studi) -- (model);
+    \draw[panah] (model) -- (impl);
+    \draw[panah] (impl) -- (sim);
+    \draw[panah] (sim) -- (eval);
+    \draw[panah] (eval) -- (cek);
+
+    % Tidak: kembali ke implementasi (tuning parameter)
+    \draw[panah] (cek.west) -- node[above, pos=0.35] {Tidak}
+      ([xshift=-6mm]t1.west |- cek.west) |- node[pos=0.25, left, align=right, font=\scriptsize] {\emph{tuning}\\parameter} (impl.west);
+
+    % Ya: lanjut ke kolom kanan
+    \coordinate (tengah) at ($(cek.east)!0.5!(cek.east -| norm.west)$);
+    \draw[panah] (cek.east) -- node[above, pos=0.3] {Ya} (cek.east -| tengah) |- (norm.west);
+
+    \draw[panah] (norm) -- (komp);
+    \draw[panah] (komp) -- (hdl);
+    \draw[panah] (hdl) -- (util);
+    \draw[panah] (util) -- (verif);
+    \draw[panah] (verif) -- (banding);
+    \draw[panah] (banding) -- (lapor);
+    \draw[panah] (lapor) -- (selesai);
+  \end{tikzpicture}
+  \caption{Diagram Alir Pelaksanaan Penelitian}
+  \label{fig:diagram_alir}
+\end{figure}

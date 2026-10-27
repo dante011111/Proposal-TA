@@ -1,0 +1,25 @@
+\begin{center}
+  \large\textbf{ABSTRACT}
+\end{center}
+
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+\vspace{2ex}
+
+\begingroup
+% Menghilangkan padding
+\setlength{\tabcolsep}{0pt}
+
+\noindent
+\begin{tabularx}{\textwidth}{l >{\centering}m{3em} X}
+  \emph{Name}     & : & \name{}         \\
+
+  \emph{Title}    & : & \engtatitle{}   \\
+
+  \emph{Advisors} & : & 1. \advisor{}   \\
+\end{tabularx}
+\endgroup
+
+\emph{Active Noise Cancellation (ANC) is used to attenuate low-frequency noise that passive attenuation cannot suppress. The Filtered-X Least Mean Square (FXLMS) algorithm is the standard in ANC systems, but its fixed step-size makes its performance dependent on manual tuning and sensitive to power variations in broadband noise. The Filtered-X Normalized Least Mean Square (FXNLMS) algorithm addresses this weakness by normalizing the step-size to the power of the filtered reference signal, but adds a power estimate and a division per iteration. Previous studies generally examined either noise reduction performance or hardware efficiency separately, so it remains unclear whether FXNLMS justifies its additional computational cost. This research compares FXLMS and FXNLMS in a feedforward single-channel (SISO) headphone ANC system in three stages: noise reduction simulation using white noise, pink noise, and real-world ambient noise recordings; analysis of how step-size normalization affects convergence speed and steady-state error; and fixed-point implementation on an Artix-7 XC7A35T FPGA. Performance is evaluated through noise reduction (SNR), convergence speed, and steady-state error, while computational efficiency is evaluated through per-iteration operation complexity and the utilization of LUTs, flip-flops, memory, and DSP slices. The results are expected to give a quantitative basis for selecting ANC algorithms for resource-constrained embedded devices.}
+
+\emph{Keywords}: \emph{Active Noise Cancellation}, \emph{FXLMS}, \emph{FXNLMS}, \emph{FPGA}, \emph{Computational Efficiency}

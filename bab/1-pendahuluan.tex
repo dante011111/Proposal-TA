@@ -1,0 +1,59 @@
+\chapter{PENDAHULUAN}
+\label{chap:pendahuluan}
+
+\section{Latar Belakang}
+\label{sec:latarbelakang}
+
+Polusi suara mendegradasi kenyamanan akustik pada berbagai lingkungan, mulai dari kabin kendaraan hingga perangkat audio portabel. \emph{Passive Noise Cancellation} (PNC) efektif meredam kebisingan frekuensi tinggi, namun performanya menurun drastis pada frekuensi rendah \parencite{chen2025,han2023}. \emph{Active Noise Cancellation} (ANC) diterapkan untuk mengatasi keterbatasan tersebut melalui prinsip interferensi destruktif secara \emph{real-time}.
+
+Algoritma \emph{Filtered-X Least Mean Square} (FXLMS) menjadi standar dalam ANC karena mampu mengompensasi jalur sekunder dan menjaga stabilitas konvergensi \parencite{han2023,xie2022}. Idealnya, algoritma kontrol adaptif pada sistem ANC memberikan konvergensi cepat dan stabil terhadap kebisingan \emph{broadband} yang bersifat non-stasioner tanpa membebani sumber daya komputasi perangkat secara berlebihan, terutama pada perangkat tersemat berkapasitas terbatas seperti \emph{headphone}. Pada praktiknya, FXLMS standar menggunakan \emph{step-size} ($\mu$) tetap sehingga kinerjanya bergantung pada \emph{tuning} manual dan rentan terhadap variasi daya sinyal pada kebisingan \emph{broadband} tersebut \parencite{cesur2025}. \emph{Filtered-X Normalized Least Mean Square} (FXNLMS) dikembangkan untuk mengatasi kelemahan ini dengan menormalisasi \emph{step-size} secara adaptif berdasarkan daya sinyal referensi terfilter. Pada aplikasi otomotif, pendekatan ini dilaporkan meningkatkan peredaman kebisingan hingga rata-rata 5,07 dB dengan performa terbaik di bawah 1 kHz, sekaligus mempercepat konvergensi dibandingkan FXLMS standar \parencite{chen2025,cesur2025}.
+
+Peningkatan performa tersebut disertai konsekuensi pada sisi komputasi. Normalisasi \emph{step-size} pada FXNLMS menambah beban berupa estimasi daya sinyal dan operasi pembagian pada setiap iterasi, yang berdampak pada kompleksitas implementasi di perangkat tersemat berkapasitas terbatas \parencite{xie2022,cesur2025}. Sejauh ini, penelitian yang membandingkan FXLMS dan FXNLMS umumnya hanya menyoroti satu sisi dari persoalan tersebut: performa peredaman melalui simulasi perangkat lunak \parencite{chen2025,han2023,xie2022,cesur2025}, atau efisiensi sumber daya perangkat keras pada algoritma adaptif lain secara terpisah, seperti reduksi penggunaan sumber daya logika FPGA sebesar 12,5\% hingga 53,3\% pada implementasi \emph{Signed-Error} LMS \parencite{ma_lei}. Belum ada kajian yang menempatkan kedua sisi ini secara berdampingan untuk kebisingan \emph{broadband} pada sistem ANC \emph{headphone}, sehingga belum diketahui secara empiris apakah keunggulan konvergensi FXNLMS sepadan dengan biaya komputasi tambahan yang ditimbulkannya.
+
+Kesenjangan inilah yang mendasari tiga pertanyaan yang diajukan dalam penelitian ini. Pertama, sejauh mana FXNLMS unggul dibandingkan FXLMS standar dalam meredam kebisingan \emph{broadband} pada sistem ANC \emph{headphone}. Kedua, apakah normalisasi \emph{step-size} benar-benar mempercepat konvergensi dan menurunkan \emph{steady-state error} saat menghadapi fluktuasi sinyal \emph{broadband}, mengingat \emph{step-size} tetap pada FXLMS menghadirkan dilema klasik antara kecepatan dan kestabilan. Ketiga, seberapa besar tambahan beban komputasi yang harus ditanggung untuk memperoleh keunggulan tersebut, dilihat dari kompleksitas operasi per-iterasi maupun konsumsi sumber daya logika pada FPGA.
+
+\section{Rumusan Masalah}
+\label{sec:rumusanmasalah}
+
+Berdasarkan latar belakang tersebut, rumusan masalah dalam tugas akhir ini adalah sebagai berikut:
+
+\begin{enumerate}
+  \item Bagaimana perbandingan kinerja algoritma FXLMS dan FXNLMS dalam meredam sinyal kebisingan tipe \emph{broadband} pada sistem ANC \emph{headphone}?
+  \item Bagaimana pengaruh mekanisme normalisasi \emph{step-size} pada algoritma FXNLMS terhadap kecepatan konvergensi dan \emph{steady-state error} saat menangani fluktuasi sinyal \emph{broadband}, jika dibandingkan dengan algoritma FXLMS standar yang menggunakan \emph{step-size} tetap?
+  \item Bagaimana tingkat efisiensi komputasi algoritma FXNLMS dibandingkan FXLMS standar, ditinjau dari kompleksitas operasi per-iterasi (jumlah operasi perkalian, penjumlahan, dan pembagian) serta utilisasi sumber daya logika blok DSP, MAC, dan LUT pada arsitektur FPGA, mengingat FXNLMS memerlukan operasi normalisasi tambahan?
+\end{enumerate}
+
+\section{Batasan Masalah}
+\label{sec:batasanmasalah}
+
+Batasan masalah dalam tugas akhir ini adalah sebagai berikut:
+
+\begin{enumerate}
+  \item Topologi Sistem: Perancangan arsitektur \emph{Active Noise Cancellation} (ANC) dibatasi pada sistem \emph{Feedforward Single-Channel} (SISO - \emph{Single-Input Single-Output}), yang merepresentasikan model pemrosesan akustik untuk satu sisi \emph{earpiece} pada \emph{headphone}.
+  \item Cakupan Algoritma: Algoritma filter adaptif yang diimplementasikan dan dikomparasikan secara eksklusif hanya algoritma \emph{Filtered-X Least Mean Square} (FXLMS) standar dengan \emph{step-size} tetap dan \emph{Filtered-X Normalized Least Mean Square} (FXNLMS) dengan \emph{step-size} ternormalisasi.
+  \item Karakteristik Sinyal Bising: Sinyal referensi atau gangguan yang dievaluasi difokuskan pada kebisingan spektrum lebar (\emph{broadband noise}) pada pita frekuensi rendah (rentang frekuensi di bawah 1000 Hz--2000 Hz). Sinyal uji direpresentasikan menggunakan \emph{white noise}, \emph{pink noise}, atau rekaman bising lingkungan nyata (\emph{real-world ambient noise}).
+  \item Metrik Evaluasi Kinerja dan Efisiensi: Evaluasi kinerja dibatasi pada metrik peredaman kebisingan (\emph{noise reduction}) yang diukur dalam SNR (\emph{Signal-to-Noise Ratio}), kecepatan konvergensi, dan \emph{steady-state error} hasil simulasi. Evaluasi efisiensi komputasi dibatasi pada kompleksitas operasi aritmetika per-iterasi serta metrik sintesis logika pada platform \emph{Field-Programmable Gate Array} (FPGA), yaitu utilisasi sumber daya (LUT, \emph{Flip-Flop}, memori, dan DSP \emph{Slices}).
+\end{enumerate}
+
+\section{Tujuan}
+\label{sec:tujuan}
+
+Berdasarkan rumusan masalah, tujuan dari penelitian ini adalah sebagai berikut:
+
+\begin{enumerate}
+  \item Menganalisis secara komparatif kemampuan algoritma FXLMS dan FXNLMS dalam mereduksi sinyal kebisingan spektrum lebar pada sistem ANC \emph{headphone}.
+  \item Mengukur dan mengidentifikasi pengaruh mekanisme normalisasi \emph{step-size} pada algoritma FXNLMS terhadap performa metrik kontrol, khususnya pada kecepatan konvergensi (\emph{convergence rate}) dan nilai galat kondisi tunak (\emph{steady-state error}), jika dibandingkan dengan performa FXLMS standar.
+  \item Menghitung dan membandingkan tingkat efisiensi komputasi antara algoritma FXLMS dan FXNLMS, mencakup kompleksitas operasi per-iterasi serta konsumsi sumber daya perangkat keras digital LUT, \emph{Flip-Flops}, dan DSP \emph{Slices} yang dibutuhkan untuk mengimplementasikan koefisien filter \emph{broadband} pada platform FPGA.
+\end{enumerate}
+
+\section{Manfaat}
+\label{sec:Manfaat}
+
+Manfaat dari penelitian adalah sebagai berikut:
+
+\begin{enumerate}
+  \item Topologi Sistem: Perancangan arsitektur \emph{Active Noise Cancellation} (ANC) dibatasi pada sistem \emph{Feedforward Single-Channel} (SISO - \emph{Single-Input Single-Output}), yang merepresentasikan model pemrosesan akustik untuk satu sisi \emph{earpiece} pada \emph{headphone}.
+  \item Cakupan Algoritma: Algoritma filter adaptif yang diimplementasikan dan dikomparasikan secara eksklusif hanya algoritma \emph{Filtered-X Least Mean Square} (FXLMS) standar dengan \emph{step-size} tetap dan \emph{Filtered-X Normalized Least Mean Square} (FXNLMS) dengan \emph{step-size} ternormalisasi.
+  \item Karakteristik Sinyal Bising: Sinyal referensi atau gangguan yang dievaluasi difokuskan pada kebisingan spektrum lebar (\emph{broadband noise}) pada pita frekuensi rendah (rentang frekuensi di bawah 1000 Hz--2000 Hz). Sinyal uji direpresentasikan menggunakan \emph{white noise}, \emph{pink noise}, atau rekaman bising lingkungan nyata (\emph{real-world ambient noise}).
+  \item Metrik Evaluasi Kinerja dan Efisiensi: Evaluasi kinerja dibatasi pada metrik peredaman kebisingan (\emph{noise reduction}) yang diukur dalam SNR (\emph{Signal-to-Noise Ratio}), kecepatan konvergensi, dan \emph{steady-state error} hasil simulasi. Evaluasi efisiensi komputasi dibatasi pada kompleksitas operasi aritmetika per-iterasi serta metrik sintesis logika pada platform \emph{Field-Programmable Gate Array} (FPGA), yaitu utilisasi sumber daya (LUT, \emph{Flip-Flop}, memori, dan DSP \emph{Slices}).
+\end{enumerate}

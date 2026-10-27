@@ -1,0 +1,303 @@
+\chapter{TINJAUAN PUSTAKA}
+\label{chap:tinjauanpustaka}
+
+\section{Hasil Penelitian Terdahulu}
+\label{sec:hasil_terdahulu}
+
+Penelitian mengenai sistem ANC berbasis algoritma keluarga LMS telah dilakukan dengan objek, metode, dan platform implementasi yang beragam. Untuk memetakan posisi penelitian ini, lima penelitian terdahulu yang paling relevan dirangkum pada Tabel~\ref{tab:penelitian_terdahulu} berdasarkan objek atau data yang digunakan, metode, parameter dan hasil utama, serta keterkaitannya dengan penelitian ini.
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{|>{\centering\arraybackslash}p{0.6cm}|>{\raggedright\arraybackslash}p{1.9cm}|>{\raggedright\arraybackslash}p{2.5cm}|>{\raggedright\arraybackslash}p{2.8cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
+  \caption{Hasil Penelitian Terdahulu}
+  \label{tab:penelitian_terdahulu} \\
+  \hline
+  \textbf{No.} & \textbf{Peneliti} & \textbf{Objek/Data} & \textbf{Metode} & \textbf{Parameter dan Hasil Utama} & \textbf{Keterikatan dengan Penelitian} \\
+  \hline
+  \endfirsthead
+  \caption[]{Hasil Penelitian Terdahulu (lanjutan)} \\
+  \hline
+  \textbf{No.} & \textbf{Peneliti} & \textbf{Objek/Data} & \textbf{Metode} & \textbf{Parameter dan Hasil Utama} & \textbf{Keterikatan dengan Penelitian} \\
+  \hline
+  \endhead
+  1. & Xie, Zhou \& Xie (2022) & Derau acak (\emph{random source}, $f_s$ 60 kHz) pada model \emph{feedforward} untuk \emph{earphone} ANC & Simulasi FxLMS di MATLAB/Simulink, ditambah \emph{low-pass filter} (LPF) FIR/Chebyshev orde 16 pada sinyal residu & Orde filter 5-30 dan \emph{step size} 0,0001-1. Pada orde 8 dan $\mu$ = 0,5, STD derau 0,04797 turun menjadi 0,000778 (0,0003826 dengan LPF). Orde terlalu rendah tidak konvergen, sedangkan orde dan $\mu$ besar membuat sistem divergen & Menjadi acuan pengaruh orde filter dan \emph{step size} terhadap kecepatan konvergensi dan stabilitas FxLMS pada sistem \emph{headphone}. Masih berupa simulasi, implementasi \emph{hardware} disebut sebagai penelitian lanjutan \\
+  \hline
+  2. & Han \& Chen (2023) & Nada tunggal 200 Hz dan 300 Hz ($\pm$55 dB), serta perpindahan 200 Hz ke 300 Hz & \emph{Hybrid fixed-filter} + FxLMS: FFT memilih koefisien pra-latih sebagai nilai awal FxLMS. Diimplementasikan pada mikrokontroler STM32H743 & Orde 128, $f_s$ 20 kHz, $\mu$ = 0,001. Reduksi $\pm$15 dB (200 Hz) tidak berubah, tetapi waktu konvergensi 300 Hz turun dari 10 s menjadi 5 s. Pada simulasi ($\mu$ = 0,005), konvergensi dari $\pm$50.000 sampel menjadi $\pm$20.000 sampel & Menunjukkan kelemahan FxLMS konvensional (konvergensi lambat, beban komputasi) pada sistem digital nyata. Orde 128 dan $f_s$ 20 kHz dapat menjadi pembanding parameter. Tidak membandingkan dengan NLMS dan tidak melaporkan penggunaan sumber daya \\
+  \hline
+  3. & Voltolini et al. (2023*) & Derau struktural pembangkit kogenerasi; 3 akselerometer sebagai referensi, 3 \emph{shaker}, 1 mikrofon \emph{error} pada jarak 40 m & FxNLMS \emph{offline} di MATLAB (SISO hingga SIMO multi-referensi), lalu uji \emph{real-time hardware-in-the-loop} pada DSP ADAU1466Z & Rentang 50-250 Hz, orde W = 256, \emph{downsampling} 16$\times$ (48 kHz ke 3 kHz), $\mu$ = 0,1. Reduksi 3,6-4,0 dB(A) (terbaik J = 2, K = 2: 4,0 dB(A)). Hasil \emph{real-time} identik dengan \emph{offline}, konvergensi $\pm$7 s & Salah satu dari sedikit \emph{paper} yang menjalankan FxNLMS pada perangkat keras khusus secara \emph{real-time}. Teknik \emph{downsampling} untuk menekan beban komputasi relevan bagi FPGA. Bukan aplikasi \emph{headphone}, tanpa pembanding FxLMS dan tanpa laporan sumber daya DSP \\
+  \hline
+  4. & Chen, Yang, Lai \& Wei (2025) & Derau impulsif frekuensi rendah (tembakan artileri) untuk perlindungan pendengaran & FxLMS arsitektur \emph{feedback} (AANC) + \emph{audio-balance control circuit} (ABCC); simulasi MATLAB R2023b dan implementasi rangkaian elektronik & Simulasi orde 30-60, $\mu$ antara $10^{-3}$ dan $10^{-2}$. Konfigurasi terbaik pada \emph{hardware} adalah orde 30 dan $\mu$ = $10^{-3}$. Reduksi maksimum 21,8 dB, dan 10-20 dB di bawah 2 kHz & Menegaskan bahwa orde dan \emph{step size} harus di-\emph{tuning} ulang saat berpindah dari simulasi ke \emph{hardware}. Berbasis rangkaian elektronik (op-amp TL074/OPA810), bukan FPGA. Tidak ada FxNLMS dan tidak ada analisis sumber daya digital \\
+  \hline
+  5. & Cesur et al. (2025*) & Derau jalan di kabin kendaraan listrik (rekaman lintasan uji, 2 mikrofon di posisi kepala pengemudi) & FxNLMS dengan \emph{variable step-size}, pemodelan jalur sekunder \emph{online} (PRBS + NLMS), \emph{high-pass filter} dan \emph{soft limiter} & $f_s$ 44,1 kHz, \emph{buffer} 256 sampel ($\pm$5,8 ms). Reduksi rata-rata 5,07 dB (8,28 dB di 250 Hz, 7,31 dB di 750 Hz), turun menjadi 2,4-3,6 dB di atas 1 kHz. Dibanding FxLMS standar: konvergensi lebih cepat dan reduksi lebih besar (disebut kualitatif, tanpa angka) & Paling dekat dengan topik penelitian ini karena menyatakan FxNLMS lebih unggul dari FxLMS dan cocok untuk sistem \emph{embedded} dengan daya komputasi terbatas. Perbandingannya tidak kuantitatif, bukan di FPGA, dan tidak ada laporan sumber daya \\
+  \hline
+\end{longtable}
+\endgroup
+
+Dua penelitian pertama mengkaji FXLMS pada tingkat simulasi dan mikrokontroler. \textcite{xie2022} mensimulasikan FXLMS pada model \emph{feedforward} untuk \emph{earphone} ANC di MATLAB/Simulink dan menunjukkan bahwa orde filter dan \emph{step-size} menentukan kestabilan algoritma. Pada orde 8 dan $\mu = 0{,}5$, standar deviasi derau turun dari 0,04797 menjadi 0,000778, sedangkan orde yang terlalu rendah gagal konvergen dan kombinasi orde serta $\mu$ yang besar membuat sistem divergen. \textcite{han2023} membawa FXLMS ke mikrokontroler STM32H743 dengan pendekatan \emph{hybrid fixed-filter}. Reduksi sekitar 15 dB pada 200 Hz tidak berubah, tetapi waktu konvergensi pada 300 Hz berkurang dari 10 s menjadi 5 s. Kedua penelitian ini menegaskan bahwa FXLMS sensitif terhadap pemilihan $\mu$ dan cenderung lambat berkonvergensi, tetapi keduanya belum membandingkan FXLMS dengan varian ternormalisasinya dan tidak melaporkan penggunaan sumber daya perangkat keras.
+
+Dari sisi implementasi perangkat keras, \textcite{chen2025} merealisasikan FXLMS dengan arsitektur \emph{feedback} dalam bentuk rangkaian elektronik untuk derau impulsif frekuensi rendah dan memperoleh reduksi maksimum 21,8 dB. Penelitian tersebut juga menunjukkan bahwa rentang parameter pada simulasi, yaitu orde 30--60 dan $\mu$ antara $10^{-3}$ dan $10^{-2}$, harus disesuaikan kembali menjadi orde 30 dan $\mu = 10^{-3}$ ketika dipindahkan ke \emph{hardware}. Sementara itu, Voltolini et al. % TODO: entri pustaka Voltolini belum tersedia, tambahkan ke pustaka/pustaka.bib lalu ganti dengan \textcite{...}
+menjalankan FXNLMS secara \emph{real-time} pada DSP ADAU1466Z untuk derau struktural pembangkit kogenerasi dan memperoleh hasil yang identik dengan simulasi \emph{offline}, dengan reduksi 3,6--4,0 dB(A). Teknik \emph{downsampling} 16$\times$ yang digunakan untuk menekan beban komputasi pada penelitian tersebut relevan bagi implementasi FPGA. Meskipun demikian, kedua penelitian ini tidak menyandingkan FXLMS dan FXNLMS secara langsung. Penelitian pertama tidak menggunakan FXNLMS, penelitian kedua tidak menggunakan FXLMS sebagai pembanding, dan keduanya tidak menyertakan analisis sumber daya digital.
+
+Penelitian yang paling dekat dengan topik ini adalah \textcite{cesur2025}, yang menerapkan FXNLMS dengan \emph{variable step-size} dan pemodelan jalur sekunder \emph{online} pada kabin kendaraan listrik. Penelitian tersebut memperoleh reduksi rata-rata 5,07 dB, dengan reduksi terbesar 8,28 dB pada 250 Hz, dan reduksi yang turun menjadi 2,4--3,6 dB di atas 1 kHz. FXNLMS dinyatakan lebih cepat berkonvergensi dan menghasilkan reduksi yang lebih besar dibandingkan FXLMS standar, tetapi perbandingan tersebut hanya disampaikan secara kualitatif tanpa data kuantitatif, tidak diimplementasikan pada FPGA, dan tidak disertai laporan penggunaan sumber daya.
+
+Berdasarkan Tabel~\ref{tab:penelitian_terdahulu}, terdapat tiga hal yang belum terjawab oleh penelitian terdahulu. Pertama, sebagian besar penelitian hanya mengevaluasi satu algoritma, yaitu FXLMS \parencite{xie2022,han2023,chen2025} atau FXNLMS saja, sehingga perbandingan langsung kedua algoritma pada kondisi uji yang sama masih jarang dilakukan. Kedua, perbandingan FXLMS dan FXNLMS yang tersedia belum didukung data kuantitatif \parencite{cesur2025}. Ketiga, belum ada penelitian yang melaporkan biaya komputasi kedua algoritma dalam bentuk utilisasi sumber daya FPGA; data efisiensi perangkat keras FPGA yang tersedia berasal dari algoritma adaptif lain, seperti \emph{Signed-Error} LMS \parencite{ma_lei}. Penelitian ini mengisi celah tersebut dengan membandingkan FXLMS dan FXNLMS secara kuantitatif pada sistem ANC \emph{headphone feedforward} SISO, baik dari sisi kinerja peredaman, karakteristik konvergensi, maupun utilisasi sumber daya pada FPGA.
+
+\section{Dasar Teori}
+\label{sec:dasar_teori}
+
+\subsection{\emph{Active Noise Cancellation} (ANC)}
+\label{sec:anc}
+
+\emph{Active Noise Cancellation} (ANC) adalah metode reduksi kebisingan yang bekerja dengan menghasilkan sinyal sekunder atau \emph{anti-noise} secara aktif. ANC berbeda dengan metode pasif seperti peredam berbahan akustik. ANC bekerja berdasarkan prinsip interferensi destruktif: gelombang \emph{anti-noise} dibuat dengan amplitudo setara dengan \emph{noise} primer, tetapi dengan fasa berlawanan sekitar 180$^\circ$. Ketika kedua gelombang bertemu pada titik kontrol, tekanan akustik residual menurun sehingga pendengar merasakan reduksi kebisingan \parencite{kuo1999}.
+
+Secara matematis, jika \emph{noise} primer dinyatakan sebagai $d(n)$ dan sinyal \emph{anti-noise} setelah melewati \emph{secondary path} dinyatakan sebagai $y_s(n)$, maka sinyal residual pada mikrofon \emph{error} adalah:
+
+\begin{equation}
+  \label{eq:2_1}
+  e(n) = d(n) + y_s(n)
+\end{equation}
+
+Tujuan sistem ANC adalah membuat $y_s(n) \approx -d(n)$, sehingga $e(n) \approx 0$. Dalam praktiknya, pencapaian kondisi tersebut dipengaruhi oleh akurasi estimasi \emph{secondary path}, karakteristik \emph{noise}, kualitas transduser, serta latensi pemrosesan digital \parencite{kuo1999,shi2016}.
+
+Terdapat tiga topologi utama sistem ANC, yaitu:
+
+\begin{enumerate}
+  \item \emph{Feedforward} ANC menggunakan mikrofon referensi yang ditempatkan sebelum zona kontrol. Mikrofon ini mendeteksi \emph{noise} sebelum \emph{noise} mencapai telinga, kemudian sistem membentuk sinyal \emph{anti-noise} berdasarkan sinyal referensi tersebut.
+  \item \emph{Feedback} ANC hanya menggunakan mikrofon \emph{error} di dalam zona kontrol. Sistem memperkirakan \emph{noise} berdasarkan sinyal residual dan berusaha meminimalkannya, tetapi tanpa informasi awal dari sumber \emph{noise}.
+  \item \emph{Hybrid} ANC menggabungkan \emph{feedforward} dan \emph{feedback} untuk memperoleh reduksi yang lebih luas, terutama pada \emph{noise} yang sebagian dapat diprediksi dan sebagian tidak dapat diprediksi. Namun, topologi ini membutuhkan lebih banyak sensor, aktuator, dan kompleksitas kendali \parencite{kuo1999,miyake2023}.
+\end{enumerate}
+
+Penelitian ini memilih topologi \emph{feedforward Single-Input Single-Output} (SISO) karena sesuai dengan konfigurasi \emph{headphone} sederhana. Satu mikrofon referensi ditempatkan pada bagian luar \emph{earcup} untuk menangkap \emph{noise} lingkungan, satu mikrofon \emph{error} ditempatkan di dalam \emph{earcup} untuk mengukur sinyal residual, dan satu \emph{speaker} digunakan sebagai aktuator penghasil \emph{anti-noise}. Konfigurasi ini hanya membutuhkan satu jalur pemrosesan utama sehingga lebih efisien untuk diimplementasikan pada FPGA dengan sumber daya terbatas \parencite{shi2016,miyake2023}.
+
+Pemilihan \emph{feedforward} juga didasarkan pada aspek kausalitas. Pada sistem \emph{feedforward}, mikrofon referensi harus menerima \emph{noise} lebih awal daripada mikrofon \emph{error}. Waktu rambat akustik dari mikrofon referensi ke mikrofon \emph{error} memberikan margin waktu bagi FPGA untuk melakukan akuisisi data, komputasi filter adaptif, dan pengiriman sinyal ke DAC. Jika total latensi digital melebihi \emph{delay} akustik tersebut, \emph{anti-noise} tiba setelah \emph{noise} primer sehingga interferensi destruktif tidak lagi efektif \parencite{kuo1999,shi2016}.
+
+Topologi \emph{feedback} dan \emph{hybrid} tetap relevan sebagai pembanding. \emph{Feedback} ANC dapat meredam komponen \emph{noise} periodik yang dapat diprediksi, tetapi lebih sensitif terhadap umpan balik akustik dan berpotensi menimbulkan osilasi. \emph{Hybrid} ANC memberikan performa lebih baik pada kondisi tertentu, tetapi tidak dipilih karena kebutuhan perangkat keras dan kompleksitas algoritmanya lebih tinggi \parencite{kuo1999,klemd2021}.
+
+\subsection{Filter Adaptif dan Algoritma LMS}
+\label{sec:lms}
+
+Filter adaptif adalah filter yang koefisiennya diperbarui secara bertahap untuk meminimalkan galat antara keluaran sistem dan sinyal yang diinginkan. Pada sistem ANC, filter adaptif berfungsi membentuk sinyal \emph{anti-noise} yang sesuai dengan karakteristik \emph{noise} primer dan \emph{secondary path}. Filter yang umum digunakan adalah \emph{Finite Impulse Response} (FIR) karena stabil secara inheren, relatif mudah diimplementasikan, dan mendukung struktur perkalian-akumulasi yang efisien pada FPGA \parencite{kuo1999,ji2025}.
+
+Keluaran filter FIR adaptif dengan panjang $L$ dinyatakan sebagai:
+
+\begin{equation}
+  \label{eq:2_2}
+  y(n) = \sum_{k=0}^{L-1} w_k(n)\,x(n-k)
+\end{equation}
+
+dengan $x(n)$ adalah sinyal masukan, $w_k(n)$ adalah koefisien filter pada sampel ke-$n$, dan $y(n)$ adalah sinyal \emph{anti-noise}. Dalam bentuk vektor, persamaan tersebut menjadi:
+
+\begin{equation}
+  \label{eq:2_3}
+  y(n) = \mathbf{w}^T(n)\,\mathbf{x}(n)
+\end{equation}
+
+dengan:
+
+\begin{equation}
+  \label{eq:2_4}
+  \mathbf{w}(n) = \begin{bmatrix} w_0(n) & w_1(n) & \cdots & w_{L-1}(n) \end{bmatrix}^T
+\end{equation}
+
+\begin{equation}
+  \label{eq:2_5}
+  \mathbf{x}(n) = \begin{bmatrix} x(n) & x(n-1) & \cdots & x(n-L+1) \end{bmatrix}^T
+\end{equation}
+
+Tujuan adaptasi adalah meminimalkan fungsi biaya \emph{Mean Square Error} (MSE):
+
+\begin{equation}
+  \label{eq:2_6}
+  J(n) = E\left[e^2(n)\right]
+\end{equation}
+
+dengan $e(n)$ sebagai sinyal galat. Karena nilai statistik jangka panjang sulit dihitung secara langsung pada sistem \emph{real-time}, algoritma \emph{Least Mean Square} (LMS) menggunakan estimasi gradien sesaat. Pembaruan koefisien LMS dinyatakan sebagai:
+
+\begin{equation}
+  \label{eq:2_7}
+  \mathbf{w}(n+1) = \mathbf{w}(n) + \mu\,e(n)\,\mathbf{x}(n)
+\end{equation}
+
+dengan $\mu$ adalah \emph{step-size} \parencite{kuo1999,pang2024}.
+
+\emph{Step-size} merupakan parameter yang menentukan keseimbangan antara kecepatan konvergensi dan kestabilan. Nilai $\mu$ yang besar membuat koefisien bergerak cepat menuju solusi optimum, tetapi dapat menyebabkan osilasi atau divergensi apabila terlalu besar. Sebaliknya, $\mu$ yang kecil menghasilkan adaptasi yang stabil tetapi lambat, terutama ketika karakteristik \emph{noise} berubah cepat. Oleh sebab itu, pemilihan $\mu$ harus mempertimbangkan panjang filter, daya sinyal masukan, dan tingkat variasi lingkungan akustik \parencite{kuo1999,pang2024}.
+
+\subsection{Algoritma FXLMS}
+\label{sec:fxlms}
+
+Pada sistem ANC, keluaran filter adaptif tidak langsung membentuk interferensi destruktif pada mikrofon \emph{error}. Sinyal \emph{anti-noise} harus melewati \emph{secondary path}, yaitu rangkaian dari DAC, penguat audio, \emph{speaker}, rambatan akustik di dalam \emph{earcup}, hingga mikrofon \emph{error}. \emph{Secondary path} memiliki \emph{delay} waktu dan respons frekuensi yang tidak ideal. Akibatnya, algoritma LMS standar menjadi kurang tepat karena sinyal referensi yang digunakan untuk pembaruan koefisien belum memperhitungkan pengaruh \emph{secondary path} \parencite{kuo1999,shi2016}.
+
+Algoritma \emph{Filtered-x Least Mean Square} (FXLMS) mengatasi masalah tersebut dengan memfilter sinyal referensi menggunakan estimasi \emph{secondary path}. Diagram blok FXLMS \emph{feedforward} SISO terdiri atas filter adaptif $W(z)$, estimasi \emph{secondary path} $\hat{S}(z)$, \emph{speaker}, mikrofon \emph{error}, dan pembentuk sinyal \emph{anti-noise}. Sinyal referensi $x(n)$ dari mikrofon luar diproses oleh $W(z)$ untuk menghasilkan $y(n)$, kemudian $x(n)$ juga difilter oleh $\hat{S}(z)$ sehingga diperoleh $x'(n)$ untuk pembaruan koefisien \parencite{kuo1999,shi2016,klemd2021}.
+
+Definisi sinyal pada FXLMS adalah sebagai berikut:
+
+\begin{itemize}
+  \item $x(n)$: sinyal \emph{noise} referensi dari mikrofon di luar \emph{earcup}.
+  \item $x'(n)$: sinyal referensi yang telah difilter oleh estimasi \emph{secondary path}.
+  \item $y(n)$: keluaran filter adaptif yang dikirim ke \emph{speaker}.
+  \item $e(n)$: sinyal residual dari mikrofon \emph{error} di dalam \emph{earcup}.
+  \item $\mathbf{w}(n)$: vektor koefisien filter adaptif FIR.
+\end{itemize}
+
+Sinyal referensi terfilter dinyatakan sebagai:
+
+\begin{equation}
+  \label{eq:2_8}
+  x'(n) = \hat{s}(n) * x(n)
+\end{equation}
+
+dengan $\hat{s}(n)$ adalah \emph{impulse response} estimasi \emph{secondary path}. Pembaruan koefisien FXLMS dengan \emph{step-size} tetap adalah \parencite{kuo1999,shi2016}:
+
+\begin{equation}
+  \label{eq:2_9}
+  \mathbf{w}(n+1) = \mathbf{w}(n) + \mu\,e(n)\,\mathbf{x}'(n)
+\end{equation}
+
+dengan:
+
+\begin{equation}
+  \label{eq:2_10}
+  \mathbf{x}'(n) = \begin{bmatrix} x'(n) & x'(n-1) & \cdots & x'(n-L+1) \end{bmatrix}^T
+\end{equation}
+
+Syarat kestabilan FXLMS secara umum dapat dinyatakan sebagai:
+
+\begin{equation}
+  \label{eq:2_11}
+  0 < \mu < \frac{2}{L\,P_{x'}}
+\end{equation}
+
+dengan $P_{x'}$ adalah daya sinyal referensi terfilter dan $L$ adalah panjang filter adaptif. Persamaan ini memperlihatkan bahwa nilai $\mu$ yang aman bergantung pada daya sinyal. Bila daya $x'(n)$ meningkat, $\mu$ harus diperkecil agar pembaruan koefisien tetap stabil. Sebaliknya, saat daya sinyal menurun, nilai $\mu$ yang tetap menyebabkan konvergensi menjadi lambat \parencite{cesur2025,kuo1999,pang2024}.
+
+Kelemahan utama FXLMS adalah penggunaan \emph{step-size} tetap. Pada lingkungan dengan variasi level \emph{noise} yang besar, misalnya saat pengguna berpindah dari ruangan sunyi ke lingkungan lalu lintas, FXLMS dapat kehilangan keseimbangan antara kecepatan adaptasi dan kestabilan. Oleh karena itu, diperlukan normalisasi \emph{step-size} terhadap daya sinyal referensi \parencite{cesur2025,pang2024}.
+
+\subsection{Algoritma FXNLMS}
+\label{sec:fxnlms}
+
+Algoritma \emph{Filtered-x Normalized Least Mean Square} (FXNLMS) merupakan pengembangan FXLMS yang menormalisasi \emph{step-size} terhadap daya sinyal referensi terfilter. Tujuannya adalah menjaga besaran pembaruan koefisien tetap proporsional terhadap level sinyal masukan. Dengan demikian, algoritma dapat tetap stabil pada sinyal kuat dan tetap mampu berkonvergensi pada sinyal lemah \parencite{cesur2025,pang2024}.
+
+Pembaruan koefisien FXNLMS dinyatakan sebagai:
+
+\begin{equation}
+  \label{eq:2_12}
+  \mathbf{w}(n+1) = \mathbf{w}(n) + \frac{\mu}{\hat{P}_{x'}(n) + \varepsilon}\,e(n)\,\mathbf{x}'(n)
+\end{equation}
+
+dengan $\hat{P}_{x'}(n)$ adalah estimasi daya sinyal referensi terfilter dan $\varepsilon$ adalah konstanta regularisasi kecil. Konstanta $\varepsilon$ mencegah pembagian dengan nilai mendekati nol ketika sinyal referensi sangat lemah atau senyap. Tanpa $\varepsilon$, pembagian tersebut dapat menghasilkan nilai pembaruan yang sangat besar dan menyebabkan ketidakstabilan numerik \parencite{cesur2025,pang2024}.
+
+Estimasi daya dapat dilakukan menggunakan metode rekursif:
+
+\begin{equation}
+  \label{eq:2_13}
+  \hat{P}_{x'}(n) = \lambda\,\hat{P}_{x'}(n-1) + (1-\lambda)\,x'^2(n)
+\end{equation}
+
+dengan $0 < \lambda < 1$ adalah faktor peluruhan. Nilai $\lambda$ yang mendekati 1 menghasilkan estimasi daya yang lebih halus dan stabil, sedangkan nilai $\lambda$ yang lebih kecil membuat estimasi lebih responsif terhadap perubahan sinyal. Metode ini hanya membutuhkan penyimpanan satu nilai daya sebelumnya, sehingga lebih efisien dibanding metode \emph{sliding window} yang harus menyimpan sejumlah sampel sebelumnya \parencite{cesur2025,pang2024}.
+
+Dari sisi implementasi FPGA, FXNLMS menambahkan operasi pembagian atau perkalian dengan invers daya. Operasi ini lebih mahal dibanding operasi perkalian dan penjumlahan pada FXLMS. Untuk menghindari pembagi yang besar, dapat digunakan blok \emph{reciprocal}, tabel pencarian, atau metode iteratif seperti Newton-Raphson. Namun, setiap pendekatan menambah kebutuhan sumber daya, latensi, atau kompleksitas kontrol \emph{timing} \parencite{shi2016,klemd2021}.
+
+\begin{table}[H]
+  \centering
+  \caption{Perbandingan FXLMS dan FXNLMS}
+  \label{tab:fxlms_fxnlms}
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{5.6cm}|>{\raggedright\arraybackslash}p{5.6cm}|}
+  \hline
+  \textbf{Aspek} & \textbf{FXLMS} & \textbf{FXNLMS} \\
+  \hline
+  \emph{Step-size} efektif & Tetap, $\mu$ & Dinormalisasi, $\mu$ / ($\hat{P}_{x'}$ + $\varepsilon$) \\
+  \hline
+  Operasi utama & Perkalian dan akumulasi & Perkalian, akumulasi, estimasi daya, dan pembagian \\
+  \hline
+  Konvergensi & Bergantung pada daya $x'(n)$ & Lebih konsisten terhadap variasi daya sinyal \\
+  \hline
+  Kestabilan & Perlu $\mu$ kecil saat daya \emph{input} besar & Lebih \emph{robust} terhadap perubahan level \emph{input} \\
+  \hline
+  Kompleksitas FPGA & Lebih rendah & Lebih tinggi karena pembagi atau blok \emph{reciprocal} \\
+  \hline
+  Kelemahan & Lambat saat sinyal lemah, berisiko tidak stabil saat sinyal kuat & Biaya komputasi dan konsumsi sumber daya lebih besar \\
+  \hline
+  \end{tabular}
+\end{table}
+
+Berdasarkan perbandingan tersebut, FXLMS cocok untuk implementasi awal yang menekankan efisiensi perangkat keras, sedangkan FXNLMS lebih sesuai bila lingkungan \emph{noise} memiliki variasi amplitudo yang signifikan \parencite{cesur2025,shi2016,pang2024}.
+
+\subsection{Representasi \emph{Fixed-Point}}
+\label{sec:fixedpoint}
+
+Implementasi FPGA untuk pemrosesan audio dan filter adaptif umumnya menggunakan aritmetika \emph{fixed-point} karena lebih hemat sumber daya, memiliki latensi rendah, dan dapat dipetakan langsung ke DSP \emph{slice}. Format \emph{fixed-point} yang umum digunakan adalah Q$m.n$, dengan $m$ bit bagian integer, $n$ bit bagian fraksi, dan biasanya satu bit tanda. Total \emph{wordlength} adalah:
+
+\begin{equation}
+  \label{eq:2_14}
+  B = m + n + 1
+\end{equation}
+
+Sebagai contoh, format Q1.15 menggunakan satu bit tanda dan 15 bit fraksi, sehingga rentang nilai yang dapat direpresentasikan adalah \parencite{klemd2021,ji2025}:
+
+\begin{equation}
+  \label{eq:2_15}
+  -1 \le x \le 1 - 2^{-15}
+\end{equation}
+
+Proses kuantisasi menyebabkan galat karena nilai kontinu atau hasil perhitungan harus dibulatkan atau dipotong agar sesuai dengan jumlah bit yang tersedia. Galat ini muncul pada sampel audio dari I2S, koefisien filter, hasil perkalian DSP, hasil akumulasi MAC, dan nilai daya pada FXNLMS. Semakin kecil \emph{wordlength}, semakin besar galat kuantisasi dan semakin besar potensi penurunan kualitas reduksi \emph{noise} \parencite{shi2016,ji2025}.
+
+\emph{Overflow} terjadi apabila hasil operasi melebihi rentang representasi \emph{fixed-point}. Pada sistem audio, \emph{overflow} dapat menimbulkan distorsi keras atau \emph{clipping}. Salah satu penanganan yang umum adalah \emph{saturation}, yaitu membatasi hasil operasi pada nilai maksimum atau minimum yang dapat direpresentasikan. Selain itu, \emph{scaling} dapat diterapkan pada koefisien, sinyal masukan, atau hasil \emph{intermediate} agar nilai tetap berada dalam rentang aman \parencite{klemd2021,ji2025}.
+
+Pada filter adaptif, presisi terbatas memiliki dampak yang lebih serius dibanding filter statis. Pertama, galat kuantisasi pada $e(n)$, $x'(n)$, dan $\mu$ menyebabkan arah pembaruan koefisien menjadi tidak sempurna. Kedua, jika nilai $\mu\,e(n)\,x'(n)$ lebih kecil daripada resolusi koefisien, hasil penjumlahan tidak mengubah nilai koefisien. Kondisi ini disebut \emph{coefficient stalling} atau berhentinya pembaruan koefisien. Akibatnya, filter tidak dapat mencapai solusi optimum meskipun secara matematis algoritma seharusnya masih beradaptasi \parencite{shi2016,klemd2021}.
+
+\emph{Fixed-point} dipilih dibanding \emph{floating-point} karena FPGA Artix-7 memiliki DSP \emph{slice} yang dioptimasi untuk operasi MAC \emph{fixed-point}. \emph{Floating-point} membutuhkan lebih banyak LUT, register, dan \emph{pipeline} sehingga meningkatkan penggunaan sumber daya serta konsumsi daya. Untuk sistem ANC \emph{headphone} dengan kebutuhan \emph{real-time} dan latensi rendah, \emph{fixed-point} memberikan keseimbangan yang lebih baik antara akurasi, kecepatan, dan efisiensi perangkat keras \parencite{klemd2021,ji2025,amd_ds181}.
+
+\subsection{\emph{Field-Programmable Gate Array} (FPGA)}
+\label{sec:fpga}
+
+\emph{Field-Programmable Gate Array} (FPGA) adalah perangkat logika \emph{programmable} yang dapat dikonfigurasi ulang untuk membentuk rangkaian digital sesuai kebutuhan. Berbeda dengan mikrokontroler yang mengeksekusi instruksi secara berurutan, FPGA dapat menjalankan banyak operasi secara paralel. Karakteristik ini sangat sesuai untuk filter FIR, konvolusi, pembaruan LMS, dan antarmuka I2S yang harus diproses dalam satu periode \emph{sampling} \parencite{shi2016,ji2025}.
+
+Elemen dasar FPGA meliputi:
+
+\begin{enumerate}
+  \item \emph{Look-Up Table} (LUT): mengimplementasikan fungsi logika kombinasional seperti \emph{multiplexer}, \emph{adder}, \emph{comparator}, dan kontrol \emph{finite-state machine}.
+  \item \emph{Flip-Flop}: menyimpan satu bit data pada tepi \emph{clock} dan membentuk register, \emph{counter}, serta \emph{pipeline}.
+  \item DSP \emph{slice}: melakukan operasi \emph{multiply-accumulate} (MAC) secara efisien untuk filter FIR, konvolusi, dan pembaruan adaptif.
+  \item \emph{Block RAM} (BRAM): menyimpan \emph{delay line} filter, koefisien adaptif, \emph{buffer} I2S, dan data internal lainnya \parencite{amd_ds181,digilent_arty}.
+\end{enumerate}
+
+Perangkat yang digunakan adalah Artix-7 XC7A35T pada \emph{board} Arty A7-35T. FPGA ini memiliki 5.200 \emph{slice}, 41.600 \emph{flip-flop}, 1.800 Kbit \emph{block RAM}, dan 90 DSP \emph{slice}. Setiap \emph{slice} terdiri atas empat LUT enam-\emph{input} dan delapan \emph{flip-flop}. Spesifikasi tersebut memadai untuk implementasi filter FIR adaptif berukuran sedang, kontrol I2S, serta pemrosesan FXLMS atau FXNLMS secara \emph{real-time} \parencite{amd_ds181,digilent_arty}.
+
+DSP \emph{slice} menjadi komponen utama dalam implementasi filter adaptif karena operasi FXLMS didominasi oleh perkalian koefisien dengan sampel sinyal dan akumulasi hasil perkalian. BRAM digunakan untuk menyimpan \emph{delay line} $x(n)$ dan $x'(n)$, sedangkan register \emph{flip-flop} menyimpan koefisien $w(n)$, sinyal \emph{error}, dan sinyal kendali \emph{pipeline}. Pembagian pada FXNLMS dapat diimplementasikan menggunakan LUT, blok \emph{reciprocal}, atau modul pembagi yang di-\emph{pipeline} \parencite{shi2016,klemd2021}.
+
+Alur perancangan HDL dimulai dengan penulisan deskripsi perangkat keras menggunakan VHDL atau Verilog. Desain kemudian diverifikasi melalui \emph{testbench} dan simulasi fungsional untuk memastikan keluaran sesuai spesifikasi. Setelah itu, desain disintesis menggunakan Vivado untuk menghasilkan \emph{netlist} logika, dilanjutkan dengan implementasi, analisis \emph{timing}, dan pembangkitan \emph{bitstream}. Pada sistem ANC, \emph{timing closure} sangat penting karena seluruh jalur pemrosesan harus selesai sebelum batas satu periode \emph{sampling} terlampaui \parencite{klemd2021,ji2025}.
+
+\subsection{Antarmuka Audio I2S}
+\label{sec:i2s}
+
+\emph{Inter-IC Sound} (I2S) adalah protokol komunikasi digital yang digunakan untuk mentransfer data audio antarperangkat digital, misalnya mikrofon MEMS, FPGA, dan DAC. I2S menggunakan tiga jalur utama:
+
+\begin{enumerate}
+  \item SCK atau BCLK: \emph{serial clock} untuk sinkronisasi bit data.
+  \item WS atau LRCLK: \emph{word select} untuk memilih kanal kiri atau kanan.
+  \item SD atau DOUT/DIN: jalur data serial yang membawa sampel audio \parencite{pinardi2022,invensense_inmp441}.
+\end{enumerate}
+
+Pada sistem ini, INMP441 berfungsi sebagai mikrofon MEMS digital dengan keluaran I2S. Modul ini menghasilkan data PCM 24-bit dan mendukung frekuensi \emph{sampling} sekitar 8 kHz hingga 48 kHz. FPGA berperan sebagai I2S \emph{master} yang menghasilkan SCK dan WS, kemudian menerima data audio dari INMP441 melalui jalur SD. Data tersebut diubah menjadi sinyal referensi $x(n)$ yang digunakan oleh filter adaptif \parencite{pinardi2022,invensense_inmp441}.
+
+PCM5102A berperan sebagai DAC audio yang menerima data digital dari FPGA melalui I2S dan mengubahnya menjadi sinyal analog untuk \emph{speaker}. Keluaran FPGA berupa sinyal \emph{anti-noise} $y(n)$ dikirim ke PCM5102A, kemudian diubah menjadi gelombang akustik oleh \emph{speaker} di dalam \emph{earcup}. Mikrofon \emph{error} di dalam \emph{earcup} kemudian mengukur sinyal residual $e(n)$ yang digunakan untuk memperbarui koefisien filter adaptif \parencite{ji2025,ti_pcm5102a}.
+
+Frekuensi \emph{sampling} menentukan waktu yang tersedia untuk memproses satu sampel. Periode \emph{sampling} adalah:
+
+\begin{equation}
+  \label{eq:2_16}
+  T_s = \frac{1}{f_s}
+\end{equation}
+
+Pada $f_s = 48~\mathrm{kHz}$, periode \emph{sampling} adalah sekitar $20{,}83~\mu\mathrm{s}$. Seluruh proses, termasuk penerimaan I2S dari INMP441, pemrosesan filter FIR, pembaruan koefisien adaptif, dan pengiriman data ke PCM5102A, harus selesai dalam waktu tersebut agar sistem tetap \emph{real-time} \parencite{shi2016,invensense_inmp441,ti_pcm5102a}.
+
+Latensi total sistem dapat dinyatakan sebagai:
+
+\begin{equation}
+  \label{eq:2_17}
+  T_{\text{latency}} \approx T_{\text{I2S}} + T_{\text{FIR}} + T_{\text{adaptif}} + T_{\text{DAC}}
+\end{equation}
+
+Latensi ini harus lebih kecil daripada waktu rambat akustik dari mikrofon referensi di luar \emph{earcup} ke mikrofon \emph{error} di dalam \emph{earcup}. Jika tidak, \emph{anti-noise} tiba terlambat dan interferensi destruktif tidak optimal. Oleh karena itu, implementasi FPGA dengan arsitektur paralel dan \emph{pipelined} menjadi penting untuk memenuhi kendala kausalitas \emph{feedforward} ANC \parencite{kuo1999,shi2016,miyake2023}.

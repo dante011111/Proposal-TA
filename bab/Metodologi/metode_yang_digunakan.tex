@@ -1,0 +1,44 @@
+Penelitian ini menggunakan metode eksperimen kuantitatif yang terdiri atas tiga tahap utama, yaitu simulasi dan evaluasi kinerja peredaman algoritma FXLMS dan FXNLMS, analisis pengaruh normalisasi \emph{step-size} terhadap karakteristik konvergensi, serta implementasi dan evaluasi efisiensi komputasi pada FPGA. Ketiga tahap tersebut disusun secara berurutan agar penelitian memiliki alur yang sistematis. Penelitian dimulai dari perbandingan kemampuan peredaman kedua algoritma pada sistem ANC \emph{headphone}, dilanjutkan dengan penelusuran penyebab perbedaan kinerja pada mekanisme normalisasi \emph{step-size}, dan diakhiri dengan pengukuran biaya komputasi yang diperlukan untuk memperoleh kinerja tersebut pada platform FPGA. Seluruh pengujian dibatasi pada sistem ANC \emph{feedforward single-channel} (SISO) yang merepresentasikan satu sisi \emph{earpiece} pada \emph{headphone}.
+
+\subsection{Metode Simulasi dan Evaluasi Kinerja Peredaman}
+\label{sec:metode_simulasi}
+
+Tahap pertama dalam penelitian ini adalah perancangan model sistem ANC \emph{feedforward} SISO pada perangkat lunak (MATLAB atau Python) untuk membandingkan kemampuan peredaman algoritma FXLMS dan FXNLMS. Model sistem mencakup jalur primer dari mikrofon referensi ke mikrofon \emph{error}, jalur sekunder dari \emph{speaker} ke mikrofon \emph{error}, estimasi jalur sekunder yang digunakan untuk memfilter sinyal referensi (\emph{filtered-x}), serta filter adaptif berstruktur FIR. Dua algoritma yang diimplementasikan pada model tersebut adalah FXLMS standar dengan \emph{step-size} tetap dan FXNLMS dengan \emph{step-size} yang dinormalisasi oleh daya sinyal referensi terfilter. Sinyal uji yang digunakan berupa \emph{white noise}, \emph{pink noise}, dan rekaman bising lingkungan nyata (\emph{real-world ambient noise}) pada pita frekuensi rendah di bawah 1000 Hz hingga 2000 Hz.
+
+Kedua algoritma diuji pada kondisi yang sama, yaitu sinyal uji, model jalur primer dan sekunder, panjang filter, frekuensi \emph{sampling}, dan kondisi awal koefisien filter, agar perbandingan berlangsung adil dan terukur. Nilai \emph{step-size} pada FXLMS ditentukan melalui penelusuran beberapa nilai (\emph{tuning}) sehingga algoritma tersebut dibandingkan pada kondisi terbaiknya, bukan pada nilai yang kebetulan merugikan. Parameter evaluasi yang digunakan pada tahap ini adalah peredaman kebisingan (\emph{noise reduction}) yang dinyatakan dalam SNR (dB), kecepatan konvergensi, dan \emph{steady-state error}. Hasil evaluasi tersebut digunakan untuk menjawab seberapa besar keunggulan FXNLMS dibandingkan FXLMS standar dalam meredam kebisingan \emph{broadband}.
+
+Pada tahap awal ini, penelitian juga menetapkan dugaan awal terhadap karakteristik masing-masing algoritma. FXLMS diduga memiliki struktur operasi yang lebih sederhana dan hemat sumber daya, tetapi kinerjanya bergantung pada pemilihan \emph{step-size} secara manual dan rentan terhadap variasi daya sinyal kebisingan. FXNLMS diduga mampu menjaga kecepatan konvergensi dan kestabilan pada daya sinyal yang berfluktuasi karena \emph{step-size} menyesuaikan diri secara otomatis, tetapi membutuhkan estimasi daya sinyal dan operasi pembagian tambahan pada setiap iterasi. Berdasarkan dugaan tersebut, FXNLMS diperkirakan unggul dari sisi kinerja peredaman, sedangkan FXLMS diperkirakan unggul dari sisi efisiensi komputasi, meskipun kesimpulan akhir tetap ditentukan berdasarkan hasil eksperimen.
+
+\begin{table}[H]
+  \centering
+  \caption{Rancangan Awal Algoritma dan Dugaan Awal}
+  \label{tab:rancangan_awal}
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabular}{|>{\centering\arraybackslash}p{2cm}|>{\raggedright\arraybackslash}p{6.6cm}|>{\raggedright\arraybackslash}p{5.8cm}|}
+  \hline
+  \textbf{Algoritma} & \textbf{Bentuk Umum Rancangan} & \textbf{Dugaan Awal} \\
+  \hline
+  FXLMS & Filter adaptif FIR dengan \emph{step-size} tetap ($\mu$). Pembaruan koefisien: $\mathbf{w}(n+1) = \mathbf{w}(n) + \mu\,e(n)\,\mathbf{x}'(n)$, dengan $x'(n)$ adalah sinyal referensi yang difilter melalui estimasi jalur sekunder & Operasi lebih sederhana dan hemat sumber daya, tetapi kinerjanya bergantung pada \emph{tuning} $\mu$ dan rentan terhadap variasi daya sinyal \\
+  \hline
+  FXNLMS & Struktur sama dengan FXLMS, dengan \emph{step-size} dinormalisasi oleh daya sinyal referensi terfilter. Pembaruan koefisien: $\mathbf{w}(n+1) = \mathbf{w}(n) + \dfrac{\mu\,e(n)\,\mathbf{x}'(n)}{\varepsilon + \|\mathbf{x}'(n)\|^2}$ & Konvergensi lebih cepat dan lebih tahan terhadap fluktuasi daya sinyal, tetapi memerlukan estimasi daya dan operasi pembagian tambahan \\
+  \hline
+  \end{tabular}
+\end{table}
+
+Sebagai dasar pelaksanaan eksperimen, kedua algoritma dibangun dengan arsitektur filter yang identik, sehingga perbedaan hasil hanya berasal dari mekanisme pembaruan koefisien, yaitu \emph{step-size} tetap pada FXLMS dan \emph{step-size} ternormalisasi pada FXNLMS.
+
+\subsection{Metode Analisis Pengaruh Normalisasi \emph{Step-Size}}
+\label{sec:metode_normalisasi}
+
+Tahap kedua adalah analisis pengaruh mekanisme normalisasi \emph{step-size} pada FXNLMS terhadap kecepatan konvergensi dan \emph{steady-state error}. Analisis dilakukan pada kerangka simulasi yang sama dengan tahap pertama, tetapi dengan skenario yang secara khusus memunculkan fluktuasi daya sinyal \emph{broadband}, misalnya perubahan tingkat daya kebisingan secara tiba-tiba selama simulasi berlangsung. Skenario ini dipilih karena kelemahan utama FXLMS dengan \emph{step-size} tetap muncul ketika daya sinyal referensi berubah, sehingga menimbulkan dilema antara kecepatan konvergensi dan kestabilan.
+
+Pada skenario tersebut, FXLMS diuji dengan beberapa nilai \emph{step-size} untuk menunjukkan hubungan antara kecepatan konvergensi dan kestabilan, sedangkan FXNLMS diuji pada konfigurasi normalisasi yang sama pada setiap skenario. Perilaku kedua algoritma diamati melalui kurva pembelajaran (\emph{learning curve}) dari daya sinyal \emph{error} terhadap jumlah iterasi. Kecepatan konvergensi diukur dari jumlah iterasi yang dibutuhkan hingga \emph{error} mencapai kisaran nilai tunaknya, sedangkan \emph{steady-state error} diukur dari rata-rata daya sinyal \emph{error} setelah algoritma konvergen. Setiap skenario diulang beberapa kali dan hasilnya dirata-ratakan untuk mengurangi pengaruh sifat acak sinyal uji. Dengan demikian, fokus utama tahap ini adalah menentukan apakah normalisasi \emph{step-size} benar-benar mempercepat konvergensi dan menurunkan \emph{steady-state error} dibandingkan \emph{step-size} tetap.
+
+\subsection{Metode Implementasi pada FPGA dan Evaluasi Efisiensi Komputasi}
+\label{sec:metode_fpga}
+
+Tahap ketiga adalah evaluasi efisiensi komputasi FXLMS dan FXNLMS, yang terdiri atas analisis kompleksitas operasi dan implementasi pada FPGA. Pada bagian pertama, jumlah operasi perkalian, penjumlahan, dan pembagian per iterasi dihitung secara analitis untuk kedua algoritma. Perhitungan ini bertujuan menunjukkan tambahan beban komputasi pada FXNLMS, yaitu estimasi daya sinyal referensi terfilter dan satu operasi pembagian pada setiap iterasi.
+
+Pada bagian kedua, kedua algoritma dirancang menggunakan \emph{hardware description language} (HDL) dengan aritmetika \emph{fixed-point} dan disintesis menggunakan Vivado pada \emph{board} Digilent Arty A7-35T yang menggunakan FPGA Xilinx Artix-7 XC7A35T. Dalam penelitian ini FPGA diposisikan sebagai platform implementasi untuk mengukur biaya komputasi algoritma, bukan sebagai fokus perancangan perangkat keras tingkat rendah. Panjang filter, lebar bit data, dan frekuensi \emph{clock} dibuat sama pada kedua arsitektur agar perbedaan utilisasi sumber daya hanya berasal dari perbedaan algoritma. Parameter evaluasi pada bagian ini adalah utilisasi sumber daya logika yang diperoleh dari laporan sintesis dan implementasi, yaitu LUT, \emph{Flip-Flop}, memori, dan DSP \emph{Slices}.
+
+Untuk memverifikasi bahwa rancangan dapat berfungsi pada perangkat sebenarnya, hasil implementasi diuji pada prototipe ANC \emph{headphone} yang terdiri atas mikrofon referensi dan mikrofon \emph{error} berbasis INMP441, DAC audio PCM5102A, penguat \emph{headphone} TPA6132A2, serta \emph{speaker driver}. Sumber kebisingan berupa \emph{white noise} dan \emph{pink noise} dari \emph{speaker} aktif, dan tingkat peredamannya diukur secara independen menggunakan mikrofon ukur. Pengujian pada prototipe ini berfungsi sebagai verifikasi implementasi, sedangkan evaluasi kinerja algoritma tetap bertumpu pada hasil simulasi sesuai batasan penelitian. Tahap ini bertujuan memberikan gambaran tentang harga komputasi yang harus dibayar untuk memperoleh keunggulan FXNLMS dibandingkan FXLMS standar.
