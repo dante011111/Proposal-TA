@@ -245,7 +245,7 @@ Proses kuantisasi menyebabkan galat karena nilai kontinu atau hasil perhitungan 
 
 Pada filter adaptif, presisi terbatas memiliki dampak yang lebih serius dibanding filter statis. Pertama, galat kuantisasi pada $e(n)$, $x'(n)$, dan $\mu$ menyebabkan arah pembaruan koefisien menjadi tidak sempurna. Kedua, jika nilai $\mu\,e(n)\,x'(n)$ lebih kecil daripada resolusi koefisien, hasil penjumlahan tidak mengubah nilai koefisien. Kondisi ini disebut \emph{coefficient stalling} atau berhentinya pembaruan koefisien. Akibatnya, filter tidak dapat mencapai solusi optimum meskipun secara matematis algoritma seharusnya masih beradaptasi \parencite{shi2016,klemd2021}.
 
-Pada FPGA seperti Artix-7, DSP \emph{slice} dioptimasi untuk operasi MAC \emph{fixed-point}. Aritmetika \emph{floating-point} membutuhkan lebih banyak LUT, register, dan \emph{pipeline} sehingga penggunaan sumber daya dan konsumsi dayanya lebih besar dibanding \emph{fixed-point} \parencite{klemd2021,ji2025,amd_ds181}.
+% Pada FPGA seperti Artix-7, DSP \emph{slice} dioptimasi untuk operasi MAC \emph{fixed-point}. Aritmetika \emph{floating-point} membutuhkan lebih banyak LUT, register, dan \emph{pipeline} sehingga penggunaan sumber daya dan konsumsi dayanya lebih besar dibanding \emph{fixed-point} \parencite{klemd2021,ji2025,amd_ds181}.
 
 \subsection{\emph{Field-Programmable Gate Array} (FPGA)}
 \label{sec:fpga}
@@ -261,7 +261,7 @@ Elemen dasar FPGA meliputi:
   \item \emph{Block RAM} (BRAM): menyimpan \emph{delay line} filter, koefisien adaptif, \emph{buffer} I2S, dan data internal lainnya \parencite{amd_ds181,digilent_arty}.
 \end{enumerate}
 
-Artix-7 XC7A35T, yang terdapat pada \emph{board} Arty A7-35T, memiliki 5.200 \emph{slice}, 41.600 \emph{flip-flop}, 1.800 Kbit \emph{block RAM}, dan 90 DSP \emph{slice}. Setiap \emph{slice} terdiri atas empat LUT enam-\emph{input} dan delapan \emph{flip-flop} \parencite{amd_ds181,digilent_arty}.
+% Artix-7 XC7A35T, yang terdapat pada \emph{board} Arty A7-35T, memiliki 5.200 \emph{slice}, 41.600 \emph{flip-flop}, 1.800 Kbit \emph{block RAM}, dan 90 DSP \emph{slice}. Setiap \emph{slice} terdiri atas empat LUT enam-\emph{input} dan delapan \emph{flip-flop} \parencite{amd_ds181,digilent_arty}.
 
 DSP \emph{slice} menjadi komponen utama dalam implementasi filter adaptif karena operasi FXLMS didominasi oleh perkalian koefisien dengan sampel sinyal dan akumulasi hasil perkalian. BRAM digunakan untuk menyimpan \emph{delay line} $x(n)$ dan $x'(n)$, sedangkan register \emph{flip-flop} menyimpan koefisien $w(n)$, sinyal \emph{error}, dan sinyal kendali \emph{pipeline}. Pembagian pada FXNLMS dapat diimplementasikan menggunakan LUT, blok \emph{reciprocal}, atau modul pembagi yang di-\emph{pipeline} \parencite{shi2016,klemd2021}.
 
@@ -270,17 +270,67 @@ Alur perancangan HDL dimulai dengan penulisan deskripsi perangkat keras mengguna
 \subsection{Antarmuka Audio I2S}
 \label{sec:i2s}
 
-\emph{Inter-IC Sound} (I2S) adalah protokol komunikasi digital yang digunakan untuk mentransfer data audio antarperangkat digital, misalnya mikrofon MEMS, FPGA, dan DAC. I2S menggunakan tiga jalur utama:
+\emph{Inter-IC Sound} (I2S) adalah standar bus serial yang dikembangkan oleh Philips Semiconductors untuk mentransfer data audio digital dalam format \emph{Pulse Code Modulation} (PCM) antar-IC di dalam satu perangkat, misalnya antara mikrofon digital, prosesor, dan DAC. I2S memisahkan sinyal \emph{clock} dari sinyal data, sehingga penerima tidak perlu memulihkan \emph{clock} dari aliran data dan rangkaian penerima menjadi lebih sederhana \parencite{philips_i2s}. Bus I2S terdiri atas tiga jalur utama:
 
 \begin{enumerate}
-  \item SCK atau BCLK: \emph{serial clock} untuk sinkronisasi bit data.
-  \item WS atau LRCLK: \emph{word select} untuk memilih kanal kiri atau kanan.
-  \item SD atau DOUT/DIN: jalur data serial yang membawa sampel audio \parencite{pinardi2022,invensense_inmp441}.
+  \item SCK (\emph{serial clock}), disebut juga BCLK (\emph{bit clock}): sinyal \emph{clock} yang menyinkronkan setiap bit data. Satu bit data dikirim pada setiap periode SCK.
+  \item WS (\emph{word select}), disebut juga LRCLK (\emph{left-right clock}): sinyal yang menunjukkan kanal dari data yang sedang dikirim. WS bernilai 0 untuk kanal kiri dan 1 untuk kanal kanan, sehingga frekuensi WS sama dengan frekuensi \emph{sampling} $f_s$.
+  \item SD (\emph{serial data}), disebut juga DOUT/DIN: jalur yang membawa sampel audio secara serial, bergantian antara kanal kiri dan kanal kanan \parencite{philips_i2s,pinardi2022}.
 \end{enumerate}
 
-INMP441 adalah mikrofon MEMS digital dengan keluaran I2S. Mikrofon ini menghasilkan data PCM 24-bit dan mendukung frekuensi \emph{sampling} sekitar 8 kHz hingga 48 kHz. INMP441 bekerja sebagai I2S \emph{slave}, sehingga sinyal SCK dan WS dibangkitkan oleh perangkat \emph{master}, sedangkan data audio dikirim melalui jalur SD \parencite{pinardi2022,invensense_inmp441}.
+Selain ketiga jalur tersebut, banyak perangkat audio menggunakan jalur tambahan MCLK (\emph{master clock}) dengan frekuensi kelipatan $f_s$, umumnya $256 f_s$, sebagai \emph{clock} sistem untuk rangkaian konversi internalnya. Jalur ini tidak termasuk dalam spesifikasi dasar I2S dan bersifat opsional bergantung pada perangkat yang digunakan \parencite{ti_pcm5102a}.
 
-PCM5102A adalah DAC audio yang menerima data digital melalui I2S dan mengubahnya menjadi sinyal analog \parencite{ji2025,ti_pcm5102a}.
+Pada bus I2S, perangkat yang membangkitkan sinyal SCK dan WS disebut \emph{master}, sedangkan perangkat yang mengikuti kedua sinyal tersebut disebut \emph{slave}. Peran \emph{master} dapat dipegang oleh pemancar, penerima, atau pengendali terpisah yang mengatur keduanya. Dengan demikian, seluruh perangkat pada satu bus bekerja dengan acuan waktu yang sama \parencite{philips_i2s}.
+
+Data audio pada I2S dikirim dalam format \emph{two's complement} dengan bit paling signifikan (\emph{most significant bit}, MSB) terlebih dahulu. Urutan MSB terlebih dahulu memungkinkan pemancar dan penerima memiliki panjang \emph{word} yang berbeda. Jika penerima menerima bit lebih banyak daripada kapasitasnya, bit yang paling tidak signifikan (\emph{least significant bit}, LSB) diabaikan. Sebaliknya, jika bit yang diterima lebih sedikit, bit sisanya diisi dengan nol. Dengan cara ini, nilai sampel tetap terbaca dengan benar meskipun resolusinya berbeda \parencite{philips_i2s}.
+
+Pemancar mengubah data pada tepi turun SCK, sedangkan penerima mengambil data pada tepi naik SCK. Sinyal WS berubah satu periode SCK sebelum MSB dikirim, sehingga MSB suatu kanal muncul pada siklus SCK kedua setelah transisi WS. Penundaan satu bit ini memberi waktu bagi penerima untuk menyimpan \emph{word} sebelumnya dan bersiap menerima \emph{word} berikutnya \parencite{philips_i2s}. Hubungan pewaktuan antara SCK, WS, dan SD ditunjukkan pada Gambar~\ref{fig:i2s_timing}.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[x=0.85cm, y=0.5cm, font=\scriptsize]
+    % Label sinyal
+    \node[left] at (0,4.5) {SCK};
+    \node[left] at (0,2.5) {WS};
+    \node[left] at (0,0.5) {SD};
+    % SCK
+    \foreach \k in {0,...,12} {
+      \draw (\k,4) -- (\k+0.5,4) -- (\k+0.5,5) -- (\k+1,5) -- (\k+1,4);
+    }
+    % WS
+    \draw (0,3) -- (1,3) -- (1,2) -- (9,2) -- (9,3) -- (13,3);
+    \node at (5,2.5) {kanal kiri (WS = 0)};
+    \node at (11,2.5) {kanan (WS = 1)};
+    % SD
+    \draw (0,1) -- (0.9,1) (0,0) -- (0.9,0);
+    \foreach \k in {1,...,12} {
+      \draw (\k-0.1,0) -- (\k+0.1,1) (\k-0.1,1) -- (\k+0.1,0);
+      \draw (\k+0.1,1) -- (\k+0.9,1) (\k+0.1,0) -- (\k+0.9,0);
+    }
+    \draw (12.9,0) -- (13,0) (12.9,1) -- (13,1);
+    \foreach \k/\lbl in {0/$\cdots$, 1/LSB, 2/MSB, 5/$\cdots$, 9/LSB, 10/MSB, 12/$\cdots$} {
+      \node at (\k+0.5,0.5) {\lbl};
+    }
+    % Penundaan satu bit
+    \draw[dashed, gray] (1,5.3) -- (1,-0.4) (2,5.3) -- (2,-0.4);
+    \draw[<->] (1,-0.8) -- (2,-0.8) node[midway, below] {1 periode SCK};
+  \end{tikzpicture}
+  \caption{Diagram pewaktuan protokol I2S}
+  \label{fig:i2s_timing}
+\end{figure}
+
+Satu periode WS disebut satu \emph{frame} dan berisi satu sampel kanal kiri dan satu sampel kanal kanan. Frekuensi SCK yang dibutuhkan bergantung pada frekuensi \emph{sampling}, jumlah kanal, dan jumlah bit tiap kanal:
+
+\begin{equation}
+  \label{eq:2_sck}
+  f_{\text{SCK}} = f_s \times N_{\text{kanal}} \times N_{\text{bit}}
+\end{equation}
+
+dengan $N_{\text{kanal}}$ adalah jumlah kanal dalam satu \emph{frame} dan $N_{\text{bit}}$ adalah jumlah slot bit tiap kanal. Sebagai contoh, pada $f_s = 48~\mathrm{kHz}$ dengan dua kanal dan slot 32 bit per kanal, diperlukan $f_{\text{SCK}} = 48~\mathrm{kHz} \times 2 \times 32 = 3{,}072~\mathrm{MHz}$ \parencite{philips_i2s}.
+
+Selain format I2S standar (format Philips), terdapat beberapa varian format serial audio. Pada format \emph{left-justified}, MSB dikirim tepat saat WS berubah tanpa penundaan satu bit. Pada format \emph{right-justified}, LSB diletakkan tepat di akhir setiap kanal sehingga posisi MSB bergantung pada panjang \emph{word}. Untuk lebih dari dua kanal, digunakan format \emph{Time-Division Multiplexing} (TDM) yang menempatkan beberapa kanal secara berurutan dalam satu \emph{frame}. Pemancar dan penerima pada satu bus harus dikonfigurasi dengan format yang sama agar data terbaca dengan benar \parencite{pinardi2022,ti_pcm5102a}.
+
+Contoh perangkat yang menggunakan antarmuka I2S adalah mikrofon MEMS digital INMP441 dan DAC audio PCM5102A. INMP441 bekerja sebagai \emph{slave} dan mengeluarkan data PCM 24-bit dalam format \emph{two's complement} dengan frekuensi \emph{sampling} sekitar 8 kHz hingga 48 kHz. Setiap \emph{frame} INMP441 terdiri atas 64 siklus SCK, yaitu 32 siklus per kanal. Pin L/R pada INMP441 menentukan kanal tempat mikrofon mengirimkan data, sedangkan selama kanal lainnya keluaran SD berada pada kondisi impedansi tinggi, sehingga dua mikrofon dapat berbagi satu jalur SD sebagai pasangan stereo \parencite{invensense_inmp441}. PCM5102A merupakan DAC yang menerima data I2S atau \emph{left-justified} dengan panjang \emph{word} 16, 24, atau 32 bit. PCM5102A juga memiliki PLL internal yang dapat membangkitkan \emph{clock} sistem dari SCK, sehingga dapat beroperasi tanpa jalur MCLK \parencite{ti_pcm5102a}.
 
 Frekuensi \emph{sampling} menentukan waktu yang tersedia untuk memproses satu sampel. Periode \emph{sampling} adalah:
 
@@ -289,7 +339,7 @@ Frekuensi \emph{sampling} menentukan waktu yang tersedia untuk memproses satu sa
   T_s = \frac{1}{f_s}
 \end{equation}
 
-Pada $f_s = 48~\mathrm{kHz}$, periode \emph{sampling} adalah sekitar $20{,}83~\mu\mathrm{s}$. Seluruh proses, termasuk penerimaan I2S dari INMP441, pemrosesan filter FIR, pembaruan koefisien adaptif, dan pengiriman data ke PCM5102A, harus selesai dalam waktu tersebut agar sistem tetap \emph{real-time} \parencite{shi2016,invensense_inmp441,ti_pcm5102a}.
+Pada $f_s = 48~\mathrm{kHz}$, periode \emph{sampling} adalah sekitar $20{,}83~\mu\mathrm{s}$. Seluruh proses, termasuk penerimaan data I2S dari mikrofon, pemrosesan filter FIR, pembaruan koefisien adaptif, dan pengiriman data ke DAC, harus selesai dalam waktu tersebut agar sistem tetap \emph{real-time} \parencite{shi2016,invensense_inmp441,ti_pcm5102a}.
 
 Latensi total sistem dapat dinyatakan sebagai:
 
