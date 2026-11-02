@@ -1,18 +1,495 @@
 \chapter{METODOLOGI}
 \label{chap:metodologi}
 
-\section{Metode yang Digunakan}
+% =====================================================================
+\section{Metode Penelitian}
 \label{sec:metode}
-\input{bab/Metodologi/metode_yang_digunakan.tex}
 
-\section{Bahan dan Peralatan yang Digunakan}
+Penelitian ini menggunakan metode eksperimen kuantitatif untuk membandingkan kinerja dan efisiensi komputasi algoritma FXLMS dan FXNLMS pada sistem ANC \emph{headphone}. Alur penelitian dimulai dari perancangan model sistem ANC \emph{feedforward} SISO dan estimasi jalur sekunder pada MATLAB atau Python. Kedua algoritma kemudian disimulasikan menggunakan rekaman bising lingkungan nyata dari repositori DEMAND, QUT-NOISE, dan MUSAN untuk memperoleh besar peredaman, kecepatan konvergensi, dan \emph{steady-state error}. Setelah hasil simulasi dinyatakan sesuai, kedua algoritma dirancang menggunakan HDL dengan aritmetika \emph{fixed-point} dan disintesis pada FPGA Artix-7 XC7A35T untuk memperoleh utilisasi sumber daya. Rancangan tersebut kemudian diverifikasi pada prototipe ANC \emph{headphone}. Hasil akhir dibandingkan antara FXLMS dengan \emph{step-size} tetap dan FXNLMS dengan \emph{step-size} ternormalisasi.
+
+Metode eksperimen kuantitatif dipilih karena ketiga rumusan masalah menuntut perbandingan numerik kedua algoritma pada kondisi uji yang sama. Kedua algoritma dibangun dengan filter adaptif, estimasi jalur sekunder, sinyal uji, dan parameter yang identik. Dengan demikian, perbedaan hasil hanya berasal dari mekanisme pembaruan koefisien. Seluruh pengujian dibatasi pada sistem ANC \emph{feedforward single-channel} (SISO) yang merepresentasikan satu sisi \emph{earcup} pada \emph{headphone}.
+
+% =====================================================================
+\section{Alat dan Bahan Penelitian}
 \label{sec:bahan_dan_peralatan}
-\input{bab/Metodologi/bahan_dan_peralatan_yang_digunakan.tex}
 
-\section{Urutan Pelaksanaan Penelitian}
+Alat dan bahan penelitian ditunjukkan pada Tabel~\ref{tab:bahan_peralatan}. Alat penelitian mencakup perangkat keras prototipe ANC, perangkat ukur dan pendukung, serta perangkat lunak simulasi, sintesis, dan analisis data. Bahan penelitian berupa rekaman bising lingkungan nyata.
+
+\begingroup
+\small
+\renewcommand{\arraystretch}{1.3}
+\begin{longtable}{|>{\raggedright\arraybackslash}p{3.4cm}|>{\raggedright\arraybackslash}p{5.6cm}|>{\raggedright\arraybackslash}p{5.2cm}|}
+  \caption{Alat dan bahan penelitian}
+  \label{tab:bahan_peralatan} \\
+  \hline
+  \textbf{Alat/Bahan} & \textbf{Spesifikasi} & \textbf{Fungsi} \\
+  \hline
+  \endfirsthead
+  \caption[]{Alat dan bahan penelitian (lanjutan)} \\
+  \hline
+  \textbf{Alat/Bahan} & \textbf{Spesifikasi} & \textbf{Fungsi} \\
+  \hline
+  \endhead
+  \emph{Board} FPGA & Digilent Arty A7-35T, Xilinx Artix-7 XC7A35T, 20.800 LUT, 41.600 FF, 90 DSP48E1, 100 MHz & Platform implementasi algoritma FXLMS dan FXNLMS serta sumber catu 3,3 V bagi mikrofon, DAC, dan penguat \\
+  \hline
+  Mikrofon referensi & INMP441, MEMS, antarmuka I2S, 24-bit, \emph{omnidirectional}, 1 unit & Akuisisi sinyal kebisingan di luar \emph{earcup} \\
+  \hline
+  Mikrofon \emph{error} & INMP441, MEMS, antarmuka I2S, 24-bit, \emph{omnidirectional}, 1 unit & Akuisisi sinyal residual di dalam \emph{earcup}, dekat telinga \\
+  \hline
+  DAC audio & PCM5102A, antarmuka I2S, 32-bit, 112 dB SNR & Konversi sinyal \emph{anti-noise} digital menjadi analog \\
+  \hline
+  Penguat \emph{headphone} & TPA6132A2, stereo, \emph{class}-G, 2,3--5,5 V & Penguatan sinyal analog untuk menggerakkan \emph{speaker} \\
+  \hline
+  \emph{Speaker driver} & Dinamis 40 mm, 32 $\Omega$, 2 unit (1 aktif, 1 cadangan) & Pembangkit sinyal \emph{anti-noise} \\
+  \hline
+  Mikrofon ukur & MIC-L20 \emph{Clip On Microphone} USB & Pengukuran independen tingkat peredaman pada prototipe \\
+  \hline
+  Sumber kebisingan & \emph{Speaker} aktif/\emph{studio monitor} & Pemutar rekaman bising lingkungan nyata pada prototipe \\
+  \hline
+  Komputer & Windows 11/Linux & Menjalankan perangkat lunak simulasi, sintesis, dan analisis data \\
+  \hline
+  Vivado Design Suite & Perangkat lunak sintesis, implementasi, dan simulasi HDL untuk FPGA Xilinx & Verifikasi \emph{testbench}, sintesis HDL, serta pengambilan laporan utilisasi LUT, \emph{flip-flop}, BRAM, dan DSP \emph{slice} \\
+  \hline
+  MATLAB/Python & Perangkat lunak simulasi dan analisis numerik & Simulasi sistem ANC, estimasi jalur sekunder, dan perhitungan metrik kinerja \\
+  \hline
+  Rekaman bising lingkungan nyata & DEMAND, QUT-NOISE, dan MUSAN (Tabel~\ref{tab:repositori_bising}) & Sinyal kebisingan untuk simulasi, estimasi jalur sekunder, dan pengujian prototipe \\
+  \hline
+\end{longtable}
+\endgroup
+
+Seluruh sinyal kebisingan pada penelitian ini diambil dari tiga repositori \emph{open-source} yang dirangkum pada Tabel~\ref{tab:repositori_bising}. Ketiga repositori dipilih karena menyediakan bising dari lingkungan yang beragam, seperti kendaraan, jalan raya, kantor, dan ruang publik, dengan lisensi terbuka.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Repositori sinyal bising lingkungan nyata}
+  \label{tab:repositori_bising}
+  \renewcommand{\arraystretch}{1.3}
+  \begin{tabular}{|>{\raggedright\arraybackslash}p{2.1cm}|>{\raggedright\arraybackslash}p{2.6cm}|>{\raggedright\arraybackslash}p{5.0cm}|>{\raggedright\arraybackslash}p{2.2cm}|>{\raggedright\arraybackslash}p{1.5cm}|}
+  \hline
+  \textbf{Dataset} & \textbf{Repositori} & \textbf{Isi} & \textbf{Format} & \textbf{Lisensi} \\
+  \hline
+  DEMAND \parencite{demand2013} & Zenodo (DOI 10.5281/ zenodo.1227121) & 17 lingkungan, antara lain kendaraan (TBUS, TCAR, TMETRO), jalan raya (STRAFFIC), kantor, rumah, dan ruang publik & 16 kanal, 48 kHz dan 16 kHz & CC BY 4.0 \\
+  \hline
+  QUT-NOISE \parencite{dean2010qutnoise} & QUT Research Data Finder & 20 sesi di 10 lokasi (CAFE, CAR, HOME, REVERB, STREET), lebih dari 10 jam, setiap sesi minimal 30 menit & Stereo, 48 kHz, 16 bit & CC BY-SA \\
+  \hline
+  MUSAN (bagian \emph{noise}) \parencite{snyder2015musan} & OpenSLR (SLR17) & 929 berkas, sekitar 6 jam; bising teknis dan bising lingkungan seperti mobil \emph{idle}, angin, hujan, dan petir & 16 kHz & CC BY 4.0 \\
+  \hline
+  \end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Alur Pelaksanaan Penelitian}
 \label{sec:urutan_pelaksanaan}
-\input{bab/Metodologi/urutan_pelaksanaan_penelitian.tex}
 
-\section{Jadwal Pelaksanaan}
-\label{sec:jadwal_penelitian}
-\input{bab/Metodologi/jadwal_penelitian.tex}
+Alur pelaksanaan penelitian ditunjukkan pada Gambar~\ref{fig:diagram_alir}. Penelitian diawali dengan studi literatur mengenai ANC, algoritma FXLMS dan FXNLMS, serta implementasi filter adaptif pada FPGA. Tahap berikutnya adalah perancangan model sistem ANC SISO, penyiapan sinyal uji, dan estimasi jalur sekunder $\hat{S}(z)$. Setelah itu, FXLMS dan FXNLMS disimulasikan dan dievaluasi berdasarkan besar peredaman, kecepatan konvergensi, dan \emph{steady-state error}.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      node distance=4.5mm,
+      proses/.style={rectangle, draw, rounded corners=1pt, align=center,
+                     text width=5.2cm, minimum height=8mm, inner sep=2pt,
+                     execute at begin node={\hyphenpenalty=10000}},
+      terminal/.style={ellipse, draw, minimum width=18mm, minimum height=6.5mm, inner sep=1pt},
+      keputusan/.style={diamond, draw, aspect=2.2, align=center, inner sep=1pt},
+      panah/.style={-latex, thick},
+    ]
+    % ---------------- Kolom kiri ----------------
+    \node[terminal] (mulai) {Mulai};
+    \node[proses, below=of mulai] (studi) {Studi literatur};
+    \node[proses, below=of studi] (model) {Perancangan model ANC SISO dan sinyal uji};
+    \node[proses, below=of model] (sec) {Estimasi jalur sekunder $\hat{S}(z)$};
+    \node[proses, below=of sec] (sim) {Simulasi FXLMS dan FXNLMS};
+    \node[proses, below=of sim] (eval) {Evaluasi NR, konvergensi, dan \emph{steady-state error}};
+    \node[keputusan, below=of eval] (cek1) {Hasil\\memadai?};
+
+    % ---------------- Kolom kanan ----------------
+    \node[proses, right=13mm of studi] (hdl) {Perancangan HDL \emph{fixed-point}};
+    \node[proses, below=of hdl] (tb) {Verifikasi HDL dengan \emph{testbench}};
+    \node[keputusan, below=of tb] (cek2) {Sesuai\\model?};
+    \node[proses, below=of cek2] (sint) {Sintesis FPGA dan evaluasi utilisasi sumber daya};
+    \node[proses, below=of sint] (proto) {Verifikasi pada prototipe ANC \emph{headphone}};
+    \node[proses, below=of proto] (banding) {Analisis data: perbandingan kinerja dan efisiensi komputasi};
+    \node[proses, below=of banding] (lapor) {Penyusunan laporan};
+    \node[terminal, below=of lapor] (selesai) {Selesai};
+
+    % ---------------- Alur kiri ----------------
+    \draw[panah] (mulai) -- (studi);
+    \draw[panah] (studi) -- (model);
+    \draw[panah] (model) -- (sec);
+    \draw[panah] (sec) -- (sim);
+    \draw[panah] (sim) -- (eval);
+    \draw[panah] (eval) -- (cek1);
+    \draw[panah] (cek1.west) -- node[above, pos=0.5] {Tidak}
+      ([xshift=-5mm]sim.west |- cek1.west) |- node[pos=0.25, left, align=right, font=\scriptsize] {\emph{tuning}\\parameter} (sim.west);
+
+    % ---------------- Perpindahan kolom ----------------
+    \coordinate (tengah) at ($(cek1.east)!0.5!(cek1.east -| hdl.west)$);
+    \draw[panah] (cek1.east) -- node[above, pos=0.3] {Ya} (cek1.east -| tengah) |- (hdl.west);
+
+    % ---------------- Alur kanan ----------------
+    \draw[panah] (hdl) -- (tb);
+    \draw[panah] (tb) -- (cek2);
+    \draw[panah] (cek2.east) -- node[above, pos=0.5] {Tidak}
+      ([xshift=5mm]tb.east |- cek2.east) |- node[pos=0.25, right, align=left, font=\scriptsize] {perbaikan\\HDL} ([yshift=-2mm]hdl.east);
+    \draw[panah] (cek2) -- node[right] {Ya} (sint);
+    \draw[panah] (sint) -- (proto);
+    \draw[panah] (proto) -- (banding);
+    \draw[panah] (banding) -- (lapor);
+    \draw[panah] (lapor) -- (selesai);
+  \end{tikzpicture}
+  \caption{Diagram alir pelaksanaan penelitian}
+  \label{fig:diagram_alir}
+\end{figure}
+
+Jika hasil simulasi belum memadai, parameter simulasi seperti \emph{step-size} dan panjang filter disetel ulang, kemudian simulasi diulang. Jika sudah memadai, kedua algoritma dirancang dalam HDL \emph{fixed-point} dan diverifikasi melalui simulasi \emph{testbench}.
+
+Jika keluaran HDL belum sesuai dengan model simulasi, rancangan HDL diperbaiki. Jika sudah sesuai, rancangan disintesis pada FPGA untuk memperoleh utilisasi sumber daya, lalu diverifikasi pada prototipe ANC \emph{headphone}. Tahap terakhir adalah analisis data yang membandingkan kinerja dan efisiensi komputasi kedua algoritma, kemudian dilanjutkan dengan penyusunan laporan tugas akhir. Penelitian ini direncanakan berlangsung selama satu semester (6 bulan). Rincian jadwal kegiatan disajikan pada Tabel~\ref{tbl:timeline}.
+
+\newcommand{\G}{\cellcolor{green}}
+\newcommand{\B}{\cellcolor{blue!70}}
+\newcommand{\Y}{\cellcolor{yellow}}
+\begin{table}[H]
+  \centering
+  \caption{Jadwal pelaksanaan tugas akhir}
+  \label{tbl:timeline}
+  \renewcommand{\arraystretch}{1.3}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{|c|p{6.4cm}|c|c|c|c|c|c|}
+  \hline
+  \textbf{No.} & \textbf{Kegiatan} & \textbf{Bulan 1} & \textbf{Bulan 2} & \textbf{Bulan 3} & \textbf{Bulan 4} & \textbf{Bulan 5} & \textbf{Bulan 6} \\
+  \hline
+  1 & Identifikasi masalah & \B &  &  &  &  &  \\
+  \hline
+  2 & Studi literatur & \B & \B &  &  &  &  \\
+  \hline
+  3 & Perancangan model sistem ANC, sinyal uji, dan estimasi jalur sekunder &  & \B &  &  &  &  \\
+  \hline
+  4 & Implementasi FXLMS dan FXNLMS pada simulasi &  & \B & \G &  &  &  \\
+  \hline
+  5 & Simulasi dan evaluasi peredaman, konvergensi, dan \emph{steady-state error} &  &  & \G & \G &  &  \\
+  \hline
+  6 & Perancangan HDL dan verifikasi \emph{testbench} &  &  &  & \G & \Y &  \\
+  \hline
+  7 & Sintesis dan evaluasi utilisasi sumber daya &  &  &  &  & \Y &  \\
+  \hline
+  8 & Pengujian prototipe dan pengukuran peredaman &  &  &  &  & \Y & \Y \\
+  \hline
+  9 & Analisis data: perbandingan kinerja dan efisiensi komputasi &  &  &  &  & \Y & \Y \\
+  \hline
+  10 & Penyusunan laporan tugas akhir &  &  &  &  & \Y & \Y \\
+  \hline
+  \end{tabular}
+  }
+\end{table}
+
+% =====================================================================
+\section{Perancangan Sistem ANC \emph{Headphone} Berbasis FPGA}
+\label{sec:perancangan}
+
+Bagian ini menjelaskan rancangan sistem ANC \emph{headphone} yang digunakan untuk membandingkan FXLMS dan FXNLMS. Pembahasan mencakup arsitektur sistem, model simulasi, estimasi jalur sekunder, rancangan algoritma FXLMS dan FXNLMS, serta implementasi pada FPGA.
+
+% ---------------------------------------------------------------------
+\subsection{Arsitektur Sistem}
+\label{sec:arsitektur}
+
+Sistem dirancang sebagai ANC \emph{feedforward} SISO untuk satu sisi \emph{earcup} \emph{headphone}. Algoritma kontrol diimplementasikan pada FPGA Artix-7 XC7A35T (\emph{board} Arty A7-35T). FPGA menerima sinyal dari dua mikrofon, menghitung sinyal \emph{anti-noise}, dan mengirimkan sinyal tersebut ke \emph{speaker} melalui rantai analog keluaran.
+
+Diagram blok sistem ditunjukkan pada Gambar~\ref{fig:diagram_blok}. Diagram tersebut terbagi menjadi empat bagian, yaitu domain akustik, FPGA, rantai analog keluaran, serta perangkat pendukung.
+
+\begin{figure}[H]
+  \centering
+  \resizebox{\textwidth}{!}{%
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      blk/.style={draw, rounded corners=1pt, align=center, minimum height=11mm, inner sep=2pt, execute at begin node={\hyphenpenalty=10000}},
+      akus/.style={blk, fill=green!10, text width=2.9cm},
+      fpga/.style={blk, fill=blue!7, text width=2.5cm},
+      analog/.style={blk, fill=orange!15, text width=2.7cm},
+      lain/.style={blk, fill=gray!12},
+      panah/.style={-latex, thick},
+      akpanah/.style={-latex, thick, gray},
+    ]
+    % ---------------- Domain akustik (kiri) ----------------
+    \node[akus] (noise) at (0,0) {Sumber \emph{noise}\\(\emph{speaker} aktif:\\rekaman DEMAND,\\QUT-NOISE, MUSAN)};
+    \node[akus] (mref) at (0,-3.2) {Mikrofon referensi\\INMP441\\(luar \emph{earcup})};
+    \node[akus] (merr) at (0,-6.8) {Mikrofon \emph{error}\\INMP441\\(dalam \emph{earcup})};
+    \node[akus] (spk) at (0,-9.8) {\emph{Speaker driver}\\40 mm, 32 $\Omega$\\(dalam \emph{earcup})};
+    \node[draw, rounded corners=3pt, inner sep=3mm, fit=(merr)(spk)] (earcup) {};
+    \node[anchor=south west, font=\footnotesize\bfseries\itshape] at (earcup.north west) {Earcup};
+    \node[lain, text width=2.9cm] (mukur) at (0,-15.2) {Mikrofon ukur\\MIC-L20 (USB)};
+
+    % ---------------- FPGA ----------------
+    \node[fpga] (clk) at (4.4,0) {\emph{Clock manager}\\(MMCM/PLL)\\pembangkit SCK, WS};
+    \node[fpga] (rx1) at (4.4,-3.2) {Penerima I2S\\kanal referensi};
+    \node[fpga] (cv1) at (7.8,-3.2) {Konversi data\\24-bit ke\\\emph{fixed-point}};
+    \node[fpga, text width=3.2cm] (w) at (11.6,-3.2) {Filter adaptif $W(z)$\\FIR $N$ \emph{tap}\\(MAC pada DSP \emph{slice},\\\emph{delay line} pada BRAM)};
+    \node[fpga, text width=3.2cm] (shat) at (11.6,-5.4) {Estimasi jalur sekunder\\$\hat{S}(z)$, FIR $M$ \emph{tap}};
+    \node[fpga] (rx2) at (4.4,-6.8) {Penerima I2S\\kanal \emph{error}};
+    \node[fpga] (cv2) at (7.8,-6.8) {Konversi data\\24-bit ke\\\emph{fixed-point}};
+    \node[fpga, text width=3.2cm] (upd) at (11.6,-7.6) {Pembaruan koefisien\\FXLMS: $\mu$ tetap\\FXNLMS:\\$\mu/(\varepsilon+\|\mathbf{X}_f(n)\|^2)$};
+    \node[fpga, text width=3.2cm] (tx) at (11.6,-10.0) {Pengirim I2S\\$y(n) \rightarrow$ DAC};
+    \node[draw, rounded corners=4pt, inner sep=3.5mm, fit=(clk)(rx1)(w)(upd)(tx)] (fpgabox) {};
+    \node[anchor=south, font=\footnotesize\bfseries] at (fpgabox.north) {FPGA Artix-7 XC7A35T (\emph{board} Arty A7-35T)};
+
+    % ---------------- Rantai analog dan pendukung ----------------
+    \node[analog] (dac) at (11.6,-12.6) {DAC audio\\PCM5102A\\(I2S, 32-bit,\\3,3 V)};
+    \node[analog] (amp) at (7.0,-12.6) {Penguat \emph{headphone}\\TPA6132A2 (3,3 V)};
+    \node[lain, text width=5.6cm] (pc) at (7.6,-15.2) {Komputer: Vivado (sintesis, \emph{bitstream}, laporan utilisasi LUT, FF, BRAM, DSP) dan MATLAB/Python (simulasi dan analisis peredaman)};
+
+    % ---------------- Jalur akustik ----------------
+    \draw[akpanah] (noise) -- node[right, align=left, font=\scriptsize] {gelombang\\\emph{noise}} (mref);
+    \draw[akpanah] (noise.west) -- ++(-0.6,0) coordinate (pk)
+      -- (pk |- merr.west) node[pos=0.5, left, align=right, font=\scriptsize] {jalur\\primer\\$P(z)$} -- (merr.west);
+    \draw[akpanah] (spk) -- node[right, align=left, font=\scriptsize] {jalur\\sekunder\\$S(z)$} (merr);
+    \draw[panah] (fpgabox.west |- 0,-8.3) -- node[above, font=\scriptsize] {3,3 V} (earcup.east |- 0,-8.3);
+
+    % ---------------- Jalur data FPGA ----------------
+    \draw[panah] (mref) -- node[above] {SD} (rx1);
+    \draw[panah] (merr) -- node[above] {SD} (rx2);
+    \draw[panah] (clk) -- node[right, align=left, font=\scriptsize] {SCK, WS (ke semua blok\\I2S, mikrofon, dan DAC)} (rx1);
+    \draw[panah] (rx1) -- (cv1);
+    \draw[panah] (rx2) -- (cv2);
+    \draw[panah] (cv1) -- node[above, pos=0.4] {$x(n)$} coordinate[pos=0.55] (xs) (w);
+    \draw[panah] (xs) |- (shat.west);
+    \draw[panah] (shat) -- node[right] {$x_f(n)$} (upd);
+    \draw[panah] (cv2.east) -- node[above] {$e(n)$} (cv2.east -| upd.west);
+    \draw[panah] (upd.east) -- ++(0.4,0) coordinate (wk) |- node[pos=0.25, right, font=\scriptsize] {$\mathbf{W}(n{+}1)$} ([yshift=-3mm]w.east);
+    \draw[panah] ([yshift=3mm]w.east) -- node[above, pos=0.7] {$y(n)$} ++(1.9,0) coordinate (yk) |- (tx.east);
+
+    % ---------------- Rantai keluaran ----------------
+    \draw[panah] (tx) -- node[right] {SD} (dac);
+    \draw[panah] (dac) -- node[above] {analog} (amp);
+    \draw[panah] (amp.west) -- (2.2,-12.6) |- (spk.east);
+
+    % ---------------- Pendukung ----------------
+    \draw[panah] (mukur) -- node[above] {USB} (pc);
+    \draw[latex-latex, thick] (pc.east) -| node[pos=0.75, right] {USB-JTAG} ([xshift=-6mm]fpgabox.south east);
+  \end{tikzpicture}%
+  }
+  \caption{Diagram blok sistem ANC \emph{headphone} berbasis FPGA}
+  \label{fig:diagram_blok}
+\end{figure}
+
+Pada domain akustik, sumber \emph{noise} berupa \emph{speaker} aktif memutar rekaman bising dari repositori pada Tabel~\ref{tab:repositori_bising}. Gelombang \emph{noise} ditangkap oleh mikrofon referensi di luar \emph{earcup} sebagai sinyal referensi. Gelombang yang sama merambat melalui jalur primer $P(z)$ menuju mikrofon \emph{error} di dalam \emph{earcup}. Mikrofon \emph{error} menangkap sinyal residual, yaitu gabungan \emph{noise} dari jalur primer dan \emph{anti-noise} dari \emph{speaker driver} yang merambat melalui jalur sekunder $S(z)$. Kedua mikrofon dicatu langsung oleh jalur 3,3 V \emph{board} Arty A7-35T melalui pin VCC Pmod.
+
+Pada FPGA, \emph{clock manager} membangkitkan sinyal SCK dan WS sehingga FPGA berperan sebagai \emph{master} bagi kedua mikrofon dan DAC. Data serial (SD) dari kedua mikrofon diterima oleh blok penerima I2S, kemudian dikonversi dari format 24-bit menjadi format \emph{fixed-point}. Hasil konversi tersebut adalah sinyal referensi $x(n)$ dan sinyal \emph{error} $e(n)$. Sinyal $x(n)$ diproses oleh filter adaptif $W(z)$ untuk menghasilkan sinyal \emph{anti-noise} $y(n)$. Secara paralel, $x(n)$ difilter oleh $\hat{S}(z)$ untuk menghasilkan sinyal referensi terfilter $x_f(n)$. Blok pembaruan koefisien menggunakan $x_f(n)$ dan $e(n)$ untuk menghitung koefisien baru $\mathbf{W}(n+1)$.
+
+Sinyal $y(n)$ dikirim melalui blok pengirim I2S ke DAC PCM5102A. Sinyal analog keluaran DAC dikuatkan oleh penguat TPA6132A2 untuk menggerakkan \emph{speaker driver} di dalam \emph{earcup}. DAC dan penguat juga dicatu oleh jalur 3,3 V \emph{board} Arty A7-35T, sedangkan \emph{speaker driver} bersifat pasif dan memperoleh daya dari keluaran penguat. Komputer digunakan untuk sintesis dan pemrograman FPGA melalui USB-JTAG, pengambilan laporan utilisasi sumber daya, serta simulasi dan analisis data. Tingkat peredaman pada prototipe diukur secara independen menggunakan mikrofon ukur MIC-L20 yang terhubung ke komputer.
+
+% ---------------------------------------------------------------------
+\subsection{Model Simulasi Sistem ANC}
+\label{sec:model_simulasi}
+
+Sebelum diimplementasikan pada FPGA, sistem ANC dimodelkan pada MATLAB atau Python. Model mengikuti struktur ANC \emph{feedforward} pada Bab~\ref{chap:tinjauanpustaka}, yaitu jalur primer $P(z)$, jalur sekunder $S(z)$, estimasi jalur sekunder $\hat{S}(z)$, dan filter adaptif $W(z)$ berstruktur FIR sepanjang $N$ \emph{tap}. Jalur primer dan jalur sekunder dimodelkan sebagai filter FIR, sehingga sinyal residual pada mikrofon \emph{error} mengikuti Persamaan~\eqref{eq:2_error}. Struktur model dibuat sama dengan Gambar~\ref{fig:diagram_blok} agar hasil simulasi dapat langsung dibandingkan dengan hasil pada FPGA.
+
+Sinyal uji yang digunakan adalah rekaman bising lingkungan nyata dari repositori DEMAND, QUT-NOISE, dan MUSAN pada Tabel~\ref{tab:repositori_bising}. Rekaman tersebut digunakan pada pita frekuensi rendah di bawah 2000 Hz.
+
+Kedua algoritma diuji pada kondisi yang sama, yaitu sinyal uji, model jalur primer dan sekunder, panjang filter, frekuensi \emph{sampling}, dan kondisi awal koefisien filter. Nilai \emph{step-size} pada FXLMS ditentukan melalui penelusuran beberapa nilai (\emph{tuning}). Cara ini dipilih agar FXLMS dibandingkan pada kondisi terbaiknya, bukan pada nilai yang kebetulan merugikan.
+
+% ---------------------------------------------------------------------
+\subsection{Estimasi Jalur Sekunder}
+\label{sec:estimasi_jalur_sekunder}
+
+FXLMS dan FXNLMS sama-sama membutuhkan estimasi jalur sekunder $\hat{S}(z)$ untuk menghasilkan sinyal referensi terfilter $x_f(n)$ pada Persamaan~\eqref{eq:2_xf}. Oleh karena itu, jalur sekunder diestimasi terlebih dahulu sebelum sistem ANC dijalankan (\emph{offline}). Pada tahap ini, filter adaptif $W(z)$ belum dijalankan, dan \emph{speaker} hanya digunakan untuk membangkitkan sinyal identifikasi.
+
+Skema estimasi jalur sekunder ditunjukkan pada Gambar~\ref{fig:estimasi_sekunder}. Sinyal identifikasi $v(n)$ berupa rekaman bising dari repositori pada Tabel~\ref{tab:repositori_bising} diberikan ke \emph{speaker} melalui rantai keluaran yang sama dengan sinyal \emph{anti-noise}, yaitu DAC, penguat, dan \emph{speaker driver}. Sinyal yang terukur pada mikrofon \emph{error} digunakan sebagai sinyal yang diinginkan $d_s(n)$. Sinyal $v(n)$ yang sama digunakan sebagai masukan filter FIR $\hat{S}(z)$ sepanjang $M$ \emph{tap}.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      blk/.style={draw, rounded corners=1pt, align=center, minimum height=10mm, inner sep=3pt},
+      jum/.style={draw, circle, inner sep=0pt, minimum size=6mm},
+      panah/.style={-latex, thick},
+    ]
+    \node[blk, text width=2.2cm] (gen) at (0,0) {Rekaman bising\\(Tabel~\ref{tab:repositori_bising})};
+    \node[blk, text width=3.6cm, fill=green!10] (s) at (5.2,1.4) {Jalur sekunder $S(z)$\\(DAC, penguat, \emph{speaker},\\mikrofon \emph{error})};
+    \node[draw, rounded corners=1pt, fill=blue!7, minimum width=3.4cm, minimum height=12mm] (sh) at (5.2,-1.4) {};
+    \node[anchor=west, align=center, inner sep=1pt] at ([xshift=1.5mm]sh.west) {Filter FIR $\hat{S}(z)$\\$M$ \emph{tap}};
+    \node[jum] (sum) at (8.9,0) {$\Sigma$};
+    \node[blk, text width=1.4cm, fill=blue!7] (lms) at (5.5,-4.0) {LMS};
+
+    % Jalur sinyal
+    \coordinate (cab) at (2.5,0);
+    \draw[thick] (gen.east) -- node[above] {$v(n)$} (cab);
+    \fill (cab) circle (1.2pt);
+    \draw[panah] (cab) |- (s.west);
+    \draw[panah] (cab) |- (sh.west);
+    \fill (cab |- sh.west) circle (1.2pt);
+    \draw[panah] (s.east) -| node[pos=0.25, above] {$d_s(n)$} node[pos=0.9, right] {$+$} (sum.north);
+    \draw[panah] (sh.east) -| node[pos=0.25, below] {$\hat{y}_s(n)$} node[pos=0.9, right] {$-$} (sum.south);
+    \draw[panah] (sum.east) -- ++(0.9,0) node[right] {$e_s(n)$};
+    \coordinate (ek) at ([xshift=4mm]sum.east);
+    \fill (ek) circle (1.2pt);
+
+    % Masukan LMS
+    \draw[panah] (cab |- sh.west) |- node[pos=0.75, above] {$\mathbf{V}(n)$} (lms.west);
+    \draw[panah] (ek) |- node[pos=0.75, above] {$e_s(n)$} (lms.east);
+
+    % Pembaruan koefisien: panah dari LMS menembus blok FIR
+    \draw[-latex, thick] (lms) -- node[pos=0.22, right] {$\hat{\mathbf{s}}(n{+}1)$} ($(lms)!1.36!([xshift=11mm]sh.center)$);
+  \end{tikzpicture}
+  \caption{Skema estimasi jalur sekunder secara \emph{offline}}
+  \label{fig:estimasi_sekunder}
+\end{figure}
+
+Keluaran $\hat{S}(z)$ dikurangkan dari $d_s(n)$ sehingga diperoleh galat estimasi $e_s(n)$. Galat $e_s(n)$ dan vektor masukan $\mathbf{V}(n) = [v(n), v(n-1), \ldots, v(n-M+1)]^T$ diberikan ke blok LMS. Blok LMS menghitung koefisien baru $\hat{\mathbf{s}}(n+1)$ mengikuti Persamaan~\eqref{eq:2_lms}:
+
+\begin{equation}
+  \label{eq:3_sec}
+  \hat{\mathbf{s}}(n+1) = \hat{\mathbf{s}}(n) + 2\mu_s\,e_s(n)\,\mathbf{V}(n)
+\end{equation}
+
+dengan $\hat{\mathbf{s}}(n) = [\hat{s}_0(n), \hat{s}_1(n), \ldots, \hat{s}_{M-1}(n)]^T$ sebagai vektor koefisien $\hat{S}(z)$ dan $\mu_s$ sebagai \emph{step-size} estimasi. Pada Persamaan~\eqref{eq:3_sec}, $e_s(n)$ berperan sebagai sinyal galat dan $\mathbf{V}(n)$ berperan sebagai vektor masukan pada LMS. Koefisien baru tersebut dimuat kembali ke filter FIR $\hat{S}(z)$, yang ditunjukkan oleh panah diagonal dari blok LMS yang menembus blok $\hat{S}(z)$ pada Gambar~\ref{fig:estimasi_sekunder}. Proses ini diulang hingga $e_s(n)$ mencapai kondisi tunak. Pengukuran dilakukan tanpa sumber \emph{noise} eksternal agar sinyal pada mikrofon \emph{error} hanya berasal dari \emph{speaker}.
+
+Pada tahap simulasi, $\hat{S}(z)$ diperoleh dengan prosedur yang sama terhadap model FIR $S(z)$. Pada prototipe, sinyal mikrofon \emph{error} direkam selama $v(n)$ diputar, kemudian koefisien $\hat{S}(z)$ dihitung dan disimpan pada FPGA sebagai koefisien tetap. Koefisien $\hat{S}(z)$ yang sama digunakan pada FXLMS dan FXNLMS. Dengan demikian, perbedaan hasil kedua algoritma tidak dipengaruhi oleh kualitas estimasi jalur sekunder.
+
+% ---------------------------------------------------------------------
+\subsection{Rancangan Algoritma FXLMS dan FXNLMS}
+\label{sec:rancangan_algoritma}
+
+FXLMS dan FXNLMS dirancang dengan struktur yang identik. Keduanya menggunakan filter adaptif $W(z)$ yang sama, estimasi $\hat{S}(z)$ yang sama, dan sinyal referensi terfilter $x_f(n)$ yang sama. Perbedaan kedua algoritma hanya terdapat pada blok pembaruan koefisien. Rancangan awal kedua algoritma dirangkum pada Tabel~\ref{tab:rancangan_awal}.
+
+\begin{table}[H]
+  \centering
+  \small
+  \caption{Rancangan awal algoritma dan dugaan awal}
+  \label{tab:rancangan_awal}
+  \renewcommand{\arraystretch}{1.4}
+  \begin{tabular}{|>{\centering\arraybackslash}p{1.8cm}|>{\raggedright\arraybackslash}p{6.8cm}|>{\raggedright\arraybackslash}p{5.6cm}|}
+  \hline
+  \textbf{Algoritma} & \textbf{Bentuk Umum Rancangan} & \textbf{Dugaan Awal} \\
+  \hline
+  FXLMS & Filter adaptif FIR dengan \emph{step-size} tetap $\mu$. Pembaruan koefisien sesuai Persamaan~\eqref{eq:2_fxlms}: $\mathbf{W}(n+1) = \mathbf{W}(n) - 2\mu\,e(n)\,\mathbf{X}_f(n)$ & Operasi lebih sederhana dan hemat sumber daya, tetapi kinerjanya bergantung pada \emph{tuning} $\mu$ dan rentan terhadap variasi daya sinyal \\
+  \hline
+  FXNLMS & Struktur sama dengan FXLMS, dengan \emph{step-size} dinormalisasi oleh energi sinyal referensi terfilter. Pembaruan koefisien sesuai Persamaan~\eqref{eq:2_fxnlms}: $\mathbf{W}(n+1) = \mathbf{W}(n) - \dfrac{\mu\,e(n)\,\mathbf{X}_f(n)}{\varepsilon + \|\mathbf{X}_f(n)\|^2}$ & Konvergensi lebih cepat dan lebih tahan terhadap fluktuasi daya sinyal, tetapi memerlukan perhitungan energi dan operasi pembagian tambahan \\
+  \hline
+  \end{tabular}
+\end{table}
+
+Pada kedua rancangan, sinyal $e(n)$ berperan sebagai sinyal galat, vektor $\mathbf{X}_f(n)$ berperan sebagai masukan yang menunjukkan arah koreksi tiap koefisien, dan $\mu$ berperan sebagai \emph{step-size}. Pada FXLMS, besar langkah pembaruan bernilai tetap. Pada FXNLMS, besar langkah pembaruan dibagi dengan energi $\|\mathbf{X}_f(n)\|^2$ yang dihitung dari jumlah kuadrat elemen vektor $\mathbf{X}_f(n)$. Konstanta $\varepsilon$ ditambahkan agar pembagian tetap terdefinisi ketika energi sinyal mendekati nol.
+
+Alur pemrosesan setiap sampel ditunjukkan pada Gambar~\ref{fig:alur_algoritma}. Alur dimulai dari penerimaan $x(n)$ dan $e(n)$. Keluaran filter $y(n)$ dihitung menggunakan Persamaan~\eqref{eq:2_fir}, kemudian dikirim ke DAC. Setelah itu, $x_f(n)$ dihitung melalui $\hat{S}(z)$ dan dimasukkan ke vektor $\mathbf{X}_f(n)$. Alur bercabang pada tahap pembaruan koefisien. FXLMS langsung memperbarui $\mathbf{W}(n)$ dengan $\mu$ tetap, sedangkan FXNLMS terlebih dahulu menghitung energi $\|\mathbf{X}_f(n)\|^2$ dan \emph{step-size} ternormalisasi.
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[
+      font=\footnotesize,
+      node distance=4.5mm,
+      proses/.style={rectangle, draw, rounded corners=1pt, align=center,
+                     text width=5.4cm, minimum height=8mm, inner sep=2pt},
+      cabang/.style={proses, text width=4.2cm},
+      terminal/.style={ellipse, draw, minimum width=18mm, minimum height=6.5mm, inner sep=1pt},
+      keputusan/.style={diamond, draw, aspect=2.2, align=center, inner sep=1pt},
+      panah/.style={-latex, thick},
+    ]
+    \node[terminal] (mulai) {Sampel ke-$n$};
+    \node[proses, below=of mulai] (in) {Terima $x(n)$ dan $e(n)$ dari penerima I2S};
+    \node[proses, below=of in] (y) {Hitung $y(n)$ dengan $W(z)$ dan kirim ke DAC};
+    \node[proses, below=of y] (xf) {Hitung $x_f(n)$ dengan $\hat{S}(z)$ dan perbarui vektor $\mathbf{X}_f(n)$};
+    \node[keputusan, below=of xf] (alg) {Algoritma};
+    \node[cabang, below=9mm of alg, xshift=-33mm] (u1) {$\mathbf{W}(n+1) = \mathbf{W}(n) - 2\mu\,e(n)\,\mathbf{X}_f(n)$};
+    \node[cabang, below=9mm of alg, xshift=33mm] (en) {Hitung energi $\|\mathbf{X}_f(n)\|^2$};
+    \node[cabang, below=of en] (mu) {$\mu_n = \mu / (\varepsilon + \|\mathbf{X}_f(n)\|^2)$};
+    \node[cabang, below=of mu] (u2) {$\mathbf{W}(n+1) = \mathbf{W}(n) - \mu_n\,e(n)\,\mathbf{X}_f(n)$};
+    \node[proses, text width=2.4cm, below=8mm of u2.south -| alg] (next) {$n \leftarrow n+1$};
+
+    \draw[panah] (mulai) -- (in);
+    \draw[panah] (in) -- (y);
+    \draw[panah] (y) -- (xf);
+    \draw[panah] (xf) -- (alg);
+    \draw[panah] (alg.west) -| node[pos=0.25, above] {FXLMS} (u1.north);
+    \draw[panah] (alg.east) -| node[pos=0.25, above] {FXNLMS} (en.north);
+    \draw[panah] (en) -- (mu);
+    \draw[panah] (mu) -- (u2);
+    \draw[panah] (u1.south) |- (next.west);
+    \draw[panah] (u2.south) |- (next.east);
+    \draw[panah] (next.south) -- ++(0,-5mm) -| ([xshift=-6mm]u1.west) |- (in.west);
+  \end{tikzpicture}
+  \caption{Alur pemrosesan setiap sampel pada FXLMS dan FXNLMS}
+  \label{fig:alur_algoritma}
+\end{figure}
+
+Berdasarkan rancangan tersebut, ditetapkan dugaan awal terhadap karakteristik kedua algoritma. FXLMS diduga lebih hemat sumber daya, tetapi kinerjanya bergantung pada pemilihan $\mu$ dan rentan terhadap variasi daya sinyal. FXNLMS diduga lebih stabil pada daya sinyal yang berfluktuasi, tetapi membutuhkan perhitungan energi dan operasi pembagian tambahan pada setiap iterasi. Kesimpulan akhir tetap ditentukan berdasarkan hasil eksperimen.
+
+% ---------------------------------------------------------------------
+\subsection{Implementasi pada FPGA}
+\label{sec:implementasi_fpga}
+
+Kedua algoritma dirancang menggunakan HDL dengan aritmetika \emph{fixed-point} dan disintesis menggunakan Vivado pada \emph{board} Arty A7-35T. FPGA diposisikan sebagai platform untuk mengukur biaya komputasi algoritma, bukan sebagai fokus perancangan perangkat keras tingkat rendah. Panjang filter $N$ dan $M$, lebar bit data, dan frekuensi \emph{clock} dibuat sama pada kedua rancangan. Nilai tersebut dipilih sama agar perbedaan utilisasi sumber daya hanya berasal dari perbedaan algoritma.
+
+Rancangan HDL terdiri atas blok penerima I2S, konversi data, filter FIR $W(z)$, filter FIR $\hat{S}(z)$, pembaruan koefisien, dan pengirim I2S sesuai Gambar~\ref{fig:diagram_blok}. Blok pembaruan koefisien menjadi satu-satunya blok yang berbeda antara kedua rancangan. Pada FXNLMS, blok tersebut ditambah dengan perhitungan energi $\|\mathbf{X}_f(n)\|^2$ dan satu operasi pembagian. Operasi perkalian dan akumulasi pada filter dipetakan ke DSP \emph{slice}, sedangkan \emph{delay line} sinyal disimpan pada BRAM. Koefisien $\hat{S}(z)$ hasil estimasi \emph{offline} disimpan sebagai koefisien tetap.
+
+% =====================================================================
+\section{Metode Pengujian dan Analisis Data}
+\label{sec:pengujian}
+
+Pengujian dilakukan untuk menjawab ketiga rumusan masalah. Seluruh metrik dihitung dengan prosedur yang sama untuk FXLMS dan FXNLMS agar hasilnya dapat dibandingkan secara langsung. Pembahasan mencakup kinerja peredaman, kecepatan konvergensi dan \emph{steady-state error}, verifikasi rancangan HDL dan prototipe, efisiensi komputasi, serta analisis data akhir.
+
+% ---------------------------------------------------------------------
+\subsection{Pengujian Kinerja Peredaman}
+\label{sec:uji_peredaman}
+
+Kinerja peredaman dinyatakan sebagai besar peredaman kebisingan (\emph{noise reduction}, NR) dalam dB. NR merupakan perbandingan daya \emph{noise} pada mikrofon \emph{error} tanpa ANC terhadap daya sinyal residual setelah ANC bekerja:
+
+\begin{equation}
+  \label{eq:3_1}
+  \mathrm{NR} = 10\log_{10}\left(\frac{\sum_{n} d^2(n)}{\sum_{n} e^2(n)}\right)
+\end{equation}
+
+dengan $d(n)$ sebagai \emph{noise} primer pada mikrofon \emph{error} tanpa ANC dan $e(n)$ sebagai sinyal residual setelah ANC bekerja. Penjumlahan dilakukan pada rentang sampel setelah algoritma mencapai kondisi tunak.
+
+Nilai NR dihitung untuk setiap rekaman bising dari repositori DEMAND, QUT-NOISE, dan MUSAN. Hasil tersebut digunakan untuk menjawab rumusan masalah pertama.
+
+% ---------------------------------------------------------------------
+\subsection{Pengujian Kecepatan Konvergensi dan \emph{Steady-State Error}}
+\label{sec:uji_konvergensi}
+
+Perilaku konvergensi diamati melalui kurva pembelajaran (\emph{learning curve}), yaitu nilai MSE terhadap jumlah iterasi. Karena hasil adaptasi bergantung pada potongan rekaman yang digunakan, setiap skenario diulang sebanyak $R$ kali dengan potongan rekaman yang berbeda, kemudian hasilnya dirata-ratakan:
+
+\begin{equation}
+  \label{eq:3_2}
+  \mathrm{MSE}(n) = \frac{1}{R}\sum_{r=1}^{R} e_r^2(n)
+\end{equation}
+
+dengan $\mathrm{MSE}(n)$ sebagai nilai MSE rata-rata pada iterasi ke-$n$ dan $e_r(n)$ sebagai sinyal \emph{error} pada iterasi ke-$n$ dari pengulangan ke-$r$.
+
+\emph{Steady-state error} dihitung sebagai rata-rata $\mathrm{MSE}(n)$ pada $K$ iterasi terakhir setelah algoritma konvergen. Kecepatan konvergensi dinyatakan sebagai jumlah iterasi yang dibutuhkan hingga $\mathrm{MSE}(n)$ masuk dan tetap berada dalam pita toleransi di sekitar nilai \emph{steady-state error} tersebut.
+
+Pengujian dilakukan pada dua skenario dengan kerangka simulasi pada Subbab~\ref{sec:model_simulasi}. Skenario pertama menggunakan rekaman bising dengan tingkat daya tetap. Skenario kedua menggunakan rekaman bising yang tingkat dayanya diubah secara tiba-tiba selama simulasi untuk memunculkan fluktuasi daya sinyal \emph{broadband}. Skenario kedua dipilih karena \emph{step-size} tetap pada FXLMS dirancang untuk satu tingkat daya sinyal referensi.
+
+Pada kedua skenario, FXLMS diuji dengan beberapa nilai \emph{step-size} untuk menunjukkan hubungan antara kecepatan konvergensi dan kestabilan. FXNLMS diuji dengan konfigurasi yang sama pada setiap skenario. Kurva pembelajaran kedua algoritma dibandingkan sebelum dan sesudah perubahan daya. Kecepatan konvergensi dan \emph{steady-state error} dari kedua skenario digunakan untuk menjawab rumusan masalah kedua.
+
+% ---------------------------------------------------------------------
+\subsection{Verifikasi Rancangan HDL dan Prototipe}
+\label{sec:verifikasi}
+
+Rancangan HDL diverifikasi menggunakan \emph{testbench} pada simulator Vivado sebelum disintesis. Sinyal uji yang sama dengan simulasi diberikan sebagai masukan $x(n)$ dan $e(n)$. Keluaran $y(n)$ dan koefisien $\mathbf{W}(n)$ dari HDL kemudian dibandingkan dengan keluaran model simulasi. Jika hasilnya belum sesuai, rancangan HDL diperbaiki sebelum dilanjutkan ke tahap sintesis.
+
+Setelah disintesis, rancangan diuji pada prototipe ANC \emph{headphone}. Rekaman bising dari repositori pada Tabel~\ref{tab:repositori_bising} diputar melalui \emph{speaker} aktif sebagai sumber kebisingan. Peredaman diukur sebagai selisih tingkat tekanan suara pada mikrofon ukur antara kondisi ANC tidak aktif dan kondisi ANC aktif. Pengujian prototipe berfungsi sebagai verifikasi implementasi, sedangkan evaluasi kinerja algoritma tetap bertumpu pada hasil simulasi sesuai batasan penelitian.
+
+% ---------------------------------------------------------------------
+\subsection{Evaluasi Efisiensi Komputasi}
+\label{sec:uji_efisiensi}
+
+Evaluasi ini dilakukan untuk menjawab rumusan masalah ketiga. Efisiensi komputasi dianalisis dari dua sisi. Pertama, jumlah operasi perkalian, penjumlahan, dan pembagian per iterasi kedua algoritma dibandingkan secara analitis berdasarkan Subbab~\ref{sec:fxnlms} dan Tabel~\ref{tab:fxlms_fxnlms}. Kedua, utilisasi sumber daya hasil sintesis dan implementasi Vivado dibandingkan untuk setiap jenis sumber daya:
+
+\begin{equation}
+  \label{eq:3_3}
+  U = \frac{N_{\text{terpakai}}}{N_{\text{tersedia}}} \times 100\%
+\end{equation}
+
+dengan $U$ sebagai persentase utilisasi suatu jenis sumber daya (LUT, \emph{flip-flop}, BRAM, atau DSP \emph{slice}), $N_{\text{terpakai}}$ sebagai jumlah sumber daya yang digunakan rancangan menurut laporan Vivado, dan $N_{\text{tersedia}}$ sebagai jumlah sumber daya tersebut pada FPGA.
+
+Selisih jumlah operasi dan utilisasi antara FXNLMS dan FXLMS digunakan untuk menjawab rumusan masalah ketiga.
+
+% ---------------------------------------------------------------------
+\subsection{Analisis Data Akhir}
+\label{sec:analisis_akhir}
+
+Analisis data akhir menggabungkan hasil Subbab~\ref{sec:uji_peredaman}, \ref{sec:uji_konvergensi}, dan \ref{sec:uji_efisiensi}. Kedua algoritma dibangun dengan filter adaptif, estimasi jalur sekunder, sinyal uji, dan parameter yang identik, sehingga satu-satunya perbedaan terdapat pada blok pembaruan koefisien. Oleh karena itu, selisih NR, kecepatan konvergensi, dan \emph{steady-state error} antara FXNLMS dan FXLMS dinyatakan sebagai hasil dari mekanisme pembaruan koefisien tersebut. Selisih utilisasi sumber daya dinyatakan sebagai biaya komputasi dari mekanisme yang sama.
+
+Hasil pada skenario daya tetap dan skenario daya berfluktuasi dibandingkan untuk melihat perubahan keunggulan FXNLMS ketika daya sinyal referensi berubah. Selisih kinerja tersebut kemudian disandingkan dengan selisih biaya komputasi. Perbandingan ini digunakan untuk menilai apakah keunggulan FXNLMS sepadan dengan biaya komputasi tambahannya.

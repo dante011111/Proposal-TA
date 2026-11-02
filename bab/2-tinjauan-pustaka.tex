@@ -50,153 +50,260 @@ Berdasarkan Tabel~\ref{tab:penelitian_terdahulu}, terdapat tiga hal yang belum t
 \subsection{\emph{Active Noise Cancellation} (ANC)}
 \label{sec:anc}
 
-\emph{Active Noise Cancellation} (ANC) adalah metode reduksi kebisingan yang bekerja dengan menghasilkan sinyal sekunder atau \emph{anti-noise} secara aktif. ANC berbeda dengan metode pasif seperti peredam berbahan akustik. ANC bekerja berdasarkan prinsip interferensi destruktif: gelombang \emph{anti-noise} dibuat dengan amplitudo setara dengan \emph{noise} primer, tetapi dengan fasa berlawanan sekitar 180$^\circ$. Ketika kedua gelombang bertemu pada titik kontrol, tekanan akustik residual menurun sehingga pendengar merasakan reduksi kebisingan \parencite{kuo1999}.
+\emph{Active Noise Cancellation} (ANC) bekerja dengan membangkitkan gelombang suara dari sumber sekunder yang memiliki amplitudo sama dan fasa berlawanan terhadap sumber suara primer, sehingga keduanya saling meniadakan melalui interferensi destruktif \parencite{zhangrs2023}. Gelombang \emph{anti-noise} yang berbeda fasa 180$^\circ$ terhadap \emph{noise} akan meredam \emph{noise} tersebut secara efektif \parencite{shi2023anc}. Kebisingan frekuensi rendah sulit dikendalikan dengan solusi peredaman pasif konvensional \parencite{shi2023anc,chen2025}.
 
-Secara matematis, jika \emph{noise} primer dinyatakan sebagai $d(n)$ dan sinyal \emph{anti-noise} setelah melewati \emph{secondary path} dinyatakan sebagai $y_s(n)$, maka sinyal residual pada mikrofon \emph{error} adalah:
+Prinsip tersebut dapat dinyatakan melalui superposisi dua gelombang tekanan. Gelombang primer dan gelombang sekunder dinyatakan sebagai \parencite{zhangrs2023}:
 
 \begin{equation}
-  \label{eq:2_1}
-  e(n) = d(n) + y_s(n)
+  \label{eq:2_p1}
+  p_1 = A\cos(\omega t - \varphi)
 \end{equation}
 
-Tujuan sistem ANC adalah membuat $y_s(n) \approx -d(n)$, sehingga $e(n) \approx 0$. Dalam praktiknya, pencapaian kondisi tersebut dipengaruhi oleh akurasi estimasi \emph{secondary path}, karakteristik \emph{noise}, kualitas transduser, serta latensi pemrosesan digital \parencite{kuo1999,shi2016}.
+\begin{equation}
+  \label{eq:2_p2}
+  p_2 = \beta A\cos(\omega t - \varphi + \alpha)
+\end{equation}
 
-Terdapat tiga topologi utama sistem ANC, yaitu:
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $p_1$ : tekanan akustik gelombang primer (\emph{noise}),
+  \item $p_2$ : tekanan akustik gelombang sekunder (\emph{anti-noise}),
+  \item $A$ : amplitudo gelombang primer,
+  \item $\omega$ : frekuensi sudut gelombang (rad/s),
+  \item $t$ : waktu (s),
+  \item $\varphi$ : fasa awal gelombang primer (rad),
+  \item $\beta$ : perbandingan amplitudo gelombang sekunder terhadap gelombang primer,
+  \item $\alpha$ : selisih fasa gelombang sekunder terhadap gelombang primer (rad).
+\end{itemize}
 
-\begin{enumerate}
-  \item \emph{Feedforward} ANC menggunakan mikrofon referensi yang ditempatkan sebelum zona kontrol. Mikrofon ini mendeteksi \emph{noise} sebelum \emph{noise} mencapai telinga, kemudian sistem membentuk sinyal \emph{anti-noise} berdasarkan sinyal referensi tersebut.
-  \item \emph{Feedback} ANC hanya menggunakan mikrofon \emph{error} di dalam zona kontrol. Sistem memperkirakan \emph{noise} berdasarkan sinyal residual dan berusaha meminimalkannya, tetapi tanpa informasi awal dari sumber \emph{noise}.
-  \item \emph{Hybrid} ANC menggabungkan \emph{feedforward} dan \emph{feedback} untuk memperoleh reduksi yang lebih luas, terutama pada \emph{noise} yang sebagian dapat diprediksi dan sebagian tidak dapat diprediksi. Namun, topologi ini membutuhkan lebih banyak sensor, aktuator, dan kompleksitas kendali \parencite{kuo1999,miyake2023}.
-\end{enumerate}
+Besar peredaman energi akibat superposisi kedua gelombang adalah \parencite{zhangrs2023}:
 
-Sistem ANC \emph{feedforward Single-Input Single-Output} (SISO) pada \emph{headphone} terdiri atas satu mikrofon referensi pada bagian luar \emph{earcup} untuk menangkap \emph{noise} lingkungan, satu mikrofon \emph{error} di dalam \emph{earcup} untuk mengukur sinyal residual, dan satu \emph{speaker} sebagai aktuator penghasil \emph{anti-noise}. Konfigurasi ini hanya membutuhkan satu jalur pemrosesan utama \parencite{shi2016,miyake2023}.
+\begin{equation}
+  \label{eq:2_reduksi}
+  \Delta = 10\lg\frac{E_1}{E_2} = -10\lg\left(1 + 2\beta\cos\alpha + \beta^2\right)
+\end{equation}
 
-Sistem ANC \emph{feedforward} memiliki kendala kausalitas. Mikrofon referensi harus menerima \emph{noise} lebih awal daripada mikrofon \emph{error}. Waktu rambat akustik dari mikrofon referensi ke mikrofon \emph{error} memberikan margin waktu bagi pemroses digital untuk melakukan akuisisi data, komputasi filter adaptif, dan pengiriman sinyal ke DAC. Jika total latensi digital melebihi \emph{delay} akustik tersebut, \emph{anti-noise} tiba setelah \emph{noise} primer sehingga interferensi destruktif tidak lagi efektif \parencite{kuo1999,shi2016}.
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\Delta$ : besar peredaman energi (dB),
+  \item $E_1$ : energi gelombang primer sebelum superposisi,
+  \item $E_2$ : energi hasil superposisi gelombang primer dan gelombang sekunder,
+  \item $\lg$ : logaritma basis 10,
+  \item $\beta$, $\alpha$ : perbandingan amplitudo dan selisih fasa seperti pada Persamaan~\eqref{eq:2_p2}.
+\end{itemize}
 
-Masing-masing topologi memiliki karakteristik yang berbeda. \emph{Feedback} ANC dapat meredam komponen \emph{noise} periodik yang dapat diprediksi, tetapi lebih sensitif terhadap umpan balik akustik dan berpotensi menimbulkan osilasi. \emph{Hybrid} ANC dapat memberikan reduksi yang lebih baik pada kondisi tertentu, tetapi membutuhkan perangkat keras dan algoritma dengan kompleksitas yang lebih tinggi \parencite{kuo1999,klemd2021}.
+Pada sistem ANC digital, sinyal residual yang terukur pada mikrofon \emph{error} merupakan jumlah dari \emph{noise} primer dan keluaran filter kontrol setelah melewati jalur sekunder \parencite{zhangrs2023,sarkar2025}:
+
+\begin{equation}
+  \label{eq:2_error}
+  e(n) = d(n) + \sum_{i=0}^{M-1} s_i\, y(n-i)
+\end{equation}
+
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $n$ : indeks sampel waktu diskrit,
+  \item $e(n)$ : sinyal residual (\emph{error}) yang terukur pada mikrofon \emph{error},
+  \item $d(n)$ : \emph{noise} primer pada posisi mikrofon \emph{error},
+  \item $s_i$ : koefisien ke-$i$ respons impuls jalur sekunder,
+  \item $M$ : panjang respons impuls jalur sekunder,
+  \item $y(n-i)$ : keluaran filter kontrol pada sampel ke-$(n-i)$.
+\end{itemize}
+
+Berdasarkan sumber sinyal yang digunakan untuk membentuk sinyal kontrol, sistem ANC dibedakan menjadi beberapa topologi. Pada sistem ANC \emph{feedforward}, sinyal referensi diperoleh dari sumber \emph{noise}. Pada sistem ANC \emph{feedback}, sinyal kontrol diperoleh hanya dengan memfilter sinyal \emph{error} \parencite{zhangrs2023}, sehingga arsitektur \emph{feedback} tidak memiliki mikrofon referensi tambahan untuk mencuplik sinyal eksternal \parencite{chen2025}. Selain kedua topologi tersebut, terdapat pula topologi \emph{hybrid} \parencite{chen2025,zhangrs2023}.
+
+Sistem ANC \emph{feedforward} pada \emph{headset} tersusun atas mikrofon referensi eksternal, mikrofon \emph{error} internal, dan sumber sekunder di dalam \emph{earmuff}. Algoritma \emph{filtered-x least mean square} (FXLMS) digunakan untuk mengadaptasi filter digital yang menggerakkan sumber sekunder tersebut \parencite{zhangqiu2014}.
+
+Sistem ANC \emph{feedforward} memiliki kendala kausalitas, yaitu \emph{delay} jalur primer harus lebih besar daripada total \emph{delay} jalur sekunder. Jika kendala ini tidak terpenuhi, \emph{bandwidth} peredaman menyempit dan peredaman maksimum menurun \parencite{zhangqiu2014}. Pada perangkat berukuran kecil, \emph{delay} akustik antara mikrofon referensi dan mikrofon \emph{error} menjadi lebih pendek sehingga jendela waktu pemrosesan yang tersedia semakin terbatas. Oleh karena itu, prosesor harus menyelesaikan pencuplikan sinyal referensi, pemrosesan, dan pembangkitan \emph{anti-noise} dengan cepat \parencite{shi2023anc}.
 
 \subsection{Filter Adaptif dan Algoritma LMS}
 \label{sec:lms}
 
-Filter adaptif adalah filter yang koefisiennya diperbarui secara bertahap untuk meminimalkan galat antara keluaran sistem dan sinyal yang diinginkan. Pada sistem ANC, filter adaptif berfungsi membentuk sinyal \emph{anti-noise} yang sesuai dengan karakteristik \emph{noise} primer dan \emph{secondary path}. Filter yang umum digunakan adalah \emph{Finite Impulse Response} (FIR) karena stabil secara inheren, relatif mudah diimplementasikan, dan mendukung struktur perkalian-akumulasi yang efisien pada FPGA \parencite{kuo1999,ji2025}.
-
-Keluaran filter FIR adaptif dengan panjang $L$ dinyatakan sebagai:
+Pada sistem ANC, filter adaptif dapat berbentuk filter \emph{Finite Impulse Response} (FIR), yaitu filter dengan struktur \emph{all-zero} \parencite{chen2025}. Keluaran filter FIR adaptif dengan $N$ koefisien dinyatakan sebagai \parencite{zhangrs2023}:
 
 \begin{equation}
-  \label{eq:2_2}
-  y(n) = \sum_{k=0}^{L-1} w_k(n)\,x(n-k)
-\end{equation}
-
-dengan $x(n)$ adalah sinyal masukan, $w_k(n)$ adalah koefisien filter pada sampel ke-$n$, dan $y(n)$ adalah sinyal \emph{anti-noise}. Dalam bentuk vektor, persamaan tersebut menjadi:
-
-\begin{equation}
-  \label{eq:2_3}
-  y(n) = \mathbf{w}^T(n)\,\mathbf{x}(n)
+  \label{eq:2_fir}
+  y(n) = \mathbf{W}^T(n)\,\mathbf{X}(n) = \sum_{i=0}^{N-1} w_i(n)\,x(n-i)
 \end{equation}
 
 dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $y(n)$ : keluaran filter adaptif pada sampel ke-$n$,
+  \item $\mathbf{W}(n) = [w_0(n), w_1(n), \ldots, w_{N-1}(n)]^T$ : vektor koefisien filter pada sampel ke-$n$,
+  \item $w_i(n)$ : koefisien ke-$i$ filter pada sampel ke-$n$,
+  \item $\mathbf{X}(n) = [x(n), x(n-1), \ldots, x(n-N+1)]^T$ : vektor $N$ sampel masukan terbaru,
+  \item $x(n-i)$ : sampel sinyal masukan pada sampel ke-$(n-i)$,
+  \item $N$ : jumlah koefisien (panjang) filter,
+  \item $(\cdot)^T$ : operasi \emph{transpose}.
+\end{itemize}
+
+Galat antara sinyal yang diinginkan dan keluaran filter adalah \parencite{zhangrs2023}:
 
 \begin{equation}
-  \label{eq:2_4}
-  \mathbf{w}(n) = \begin{bmatrix} w_0(n) & w_1(n) & \cdots & w_{L-1}(n) \end{bmatrix}^T
+  \label{eq:2_e_lms}
+  e(n) = d(n) - y(n)
 \end{equation}
 
-\begin{equation}
-  \label{eq:2_5}
-  \mathbf{x}(n) = \begin{bmatrix} x(n) & x(n-1) & \cdots & x(n-L+1) \end{bmatrix}^T
-\end{equation}
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $e(n)$ : sinyal galat pada sampel ke-$n$,
+  \item $d(n)$ : sinyal yang diinginkan (\emph{desired signal}) pada sampel ke-$n$,
+  \item $y(n)$ : keluaran filter adaptif pada Persamaan~\eqref{eq:2_fir}.
+\end{itemize}
 
-Tujuan adaptasi adalah meminimalkan fungsi biaya \emph{Mean Square Error} (MSE):
+Tujuan adaptasi adalah meminimalkan fungsi biaya \emph{Mean Square Error} (MSE) \parencite{zhangrs2023}:
 
 \begin{equation}
-  \label{eq:2_6}
+  \label{eq:2_mse}
   J(n) = E\left[e^2(n)\right]
 \end{equation}
 
-dengan $e(n)$ sebagai sinyal galat. Karena nilai statistik jangka panjang sulit dihitung secara langsung pada sistem \emph{real-time}, algoritma \emph{Least Mean Square} (LMS) menggunakan estimasi gradien sesaat. Pembaruan koefisien LMS dinyatakan sebagai:
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $J(n)$ : fungsi biaya MSE pada sampel ke-$n$,
+  \item $E[\cdot]$ : operator nilai harapan (\emph{expected value}),
+  \item $e(n)$ : sinyal galat pada Persamaan~\eqref{eq:2_e_lms}.
+\end{itemize}
+
+Metode \emph{steepest descent} memperbarui koefisien filter berlawanan arah dengan gradien fungsi biaya \parencite{zhangrs2023}:
 
 \begin{equation}
-  \label{eq:2_7}
-  \mathbf{w}(n+1) = \mathbf{w}(n) + \mu\,e(n)\,\mathbf{x}(n)
+  \label{eq:2_sd}
+  \mathbf{W}(n+1) = \mathbf{W}(n) - \mu\,\nabla(n)
 \end{equation}
 
-dengan $\mu$ adalah \emph{step-size} \parencite{kuo1999,pang2024}.
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\mathbf{W}(n+1)$ : vektor koefisien filter hasil pembaruan untuk sampel berikutnya,
+  \item $\mu$ : \emph{step-size}, yaitu konstanta positif yang mengatur besar langkah pembaruan,
+  \item $\nabla(n)$ : gradien fungsi biaya $J(n)$ terhadap vektor koefisien $\mathbf{W}(n)$.
+\end{itemize}
 
-\emph{Step-size} merupakan parameter yang menentukan keseimbangan antara kecepatan konvergensi dan kestabilan. Nilai $\mu$ yang besar membuat koefisien bergerak cepat menuju solusi optimum, tetapi dapat menyebabkan osilasi atau divergensi apabila terlalu besar. Sebaliknya, $\mu$ yang kecil menghasilkan adaptasi yang stabil tetapi lambat, terutama ketika karakteristik \emph{noise} berubah cepat. Oleh sebab itu, pemilihan $\mu$ harus mempertimbangkan panjang filter, daya sinyal masukan, dan tingkat variasi lingkungan akustik \parencite{kuo1999,pang2024}.
+Algoritma \emph{Least Mean Square} (LMS) menggunakan estimasi gradien sesaat $\hat{\nabla} = -2e(n)\mathbf{X}(n)$, yaitu gradien dari $e^2(n)$ sebagai pengganti nilai harapan $E[e^2(n)]$, sehingga persamaan pembaruan koefisien LMS menjadi \parencite{zhangrs2023}:
+
+\begin{equation}
+  \label{eq:2_lms}
+  \mathbf{W}(n+1) = \mathbf{W}(n) + 2\mu\,e(n)\,\mathbf{X}(n)
+\end{equation}
+
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\hat{\nabla}$ : estimasi gradien sesaat,
+  \item $\mu$ : \emph{step-size},
+  \item $e(n)$ : sinyal galat pada Persamaan~\eqref{eq:2_e_lms},
+  \item $\mathbf{X}(n)$ : vektor sampel masukan pada Persamaan~\eqref{eq:2_fir}.
+\end{itemize}
+
+Syarat konvergensi algoritma LMS dinyatakan sebagai \parencite{zhangrs2023}:
+
+\begin{equation}
+  \label{eq:2_bound}
+  0 < \mu < \frac{1}{\mathrm{tr}[\mathbf{R}]}
+\end{equation}
+
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\mathbf{R} = E[\mathbf{X}(n)\mathbf{X}^T(n)]$ : matriks autokorelasi sinyal masukan,
+  \item $\mathrm{tr}[\cdot]$ : \emph{trace} matriks, yaitu jumlah elemen diagonal utama matriks.
+\end{itemize}
+
+\emph{Step-size} menentukan kecepatan konvergensi dan kestabilan sistem \parencite{zhangrs2023,chen2025}. \emph{Step-size} yang kecil menghasilkan konvergensi yang lambat, tetapi menghasilkan residual \emph{error} kondisi tunak yang lebih rendah \parencite{li2026}. Hal ini menunjukkan adanya \emph{trade-off} antara laju konvergensi dan kinerja kondisi tunak \parencite{sarkar2025}. Sebaliknya, \emph{step-size} yang terlalu besar dapat membuat sistem tidak stabil \parencite{chen2025}.
 
 \subsection{Algoritma FXLMS}
 \label{sec:fxlms}
 
-Pada sistem ANC, keluaran filter adaptif tidak langsung membentuk interferensi destruktif pada mikrofon \emph{error}. Sinyal \emph{anti-noise} harus melewati \emph{secondary path}, yaitu rangkaian dari DAC, penguat audio, \emph{speaker}, rambatan akustik di dalam \emph{earcup}, hingga mikrofon \emph{error}. \emph{Secondary path} memiliki \emph{delay} waktu dan respons frekuensi yang tidak ideal. Akibatnya, algoritma LMS standar menjadi kurang tepat karena sinyal referensi yang digunakan untuk pembaruan koefisien belum memperhitungkan pengaruh \emph{secondary path} \parencite{kuo1999,shi2016}.
+Algoritma yang paling banyak digunakan pada aplikasi ANC adalah \emph{filtered-x least mean square} (FXLMS) \parencite{klemd2021}. Pada sistem ANC, sinyal kontrol tidak langsung bertemu dengan \emph{noise} pada mikrofon \emph{error}, tetapi melewati jalur sekunder, yaitu respons impuls dari \emph{speaker} kontrol ke mikrofon \emph{error} \parencite{sarkar2025,chen2025}. FXLMS memperhitungkan latensi akustik pada respons antara sumber sekunder dan sensor \emph{error} tersebut \parencite{shi2023anc}.
 
-Algoritma \emph{Filtered-x Least Mean Square} (FXLMS) mengatasi masalah tersebut dengan memfilter sinyal referensi menggunakan estimasi \emph{secondary path}. Diagram blok FXLMS \emph{feedforward} SISO terdiri atas filter adaptif $W(z)$, estimasi \emph{secondary path} $\hat{S}(z)$, \emph{speaker}, mikrofon \emph{error}, dan pembentuk sinyal \emph{anti-noise}. Sinyal referensi $x(n)$ dari mikrofon luar diproses oleh $W(z)$ untuk menghasilkan $y(n)$, kemudian $x(n)$ juga difilter oleh $\hat{S}(z)$ sehingga diperoleh $x'(n)$ untuk pembaruan koefisien \parencite{kuo1999,shi2016,klemd2021}.
-
-Definisi sinyal pada FXLMS adalah sebagai berikut:
-
-\begin{itemize}
-  \item $x(n)$: sinyal \emph{noise} referensi dari mikrofon di luar \emph{earcup}.
-  \item $x'(n)$: sinyal referensi yang telah difilter oleh estimasi \emph{secondary path}.
-  \item $y(n)$: keluaran filter adaptif yang dikirim ke \emph{speaker}.
-  \item $e(n)$: sinyal residual dari mikrofon \emph{error} di dalam \emph{earcup}.
-  \item $\mathbf{w}(n)$: vektor koefisien filter adaptif FIR.
-\end{itemize}
-
-Sinyal referensi terfilter dinyatakan sebagai:
+Pada FXLMS, sinyal referensi difilter terlebih dahulu menggunakan estimasi jalur sekunder sehingga diperoleh sinyal referensi terfilter \parencite{zhangrs2023,sarkar2025}:
 
 \begin{equation}
-  \label{eq:2_8}
-  x'(n) = \hat{s}(n) * x(n)
+  \label{eq:2_xf}
+  x_f(n) = \sum_{i=0}^{M-1} \hat{s}_i\, x(n-i)
 \end{equation}
 
-dengan $\hat{s}(n)$ adalah \emph{impulse response} estimasi \emph{secondary path}. Pembaruan koefisien FXLMS dengan \emph{step-size} tetap adalah \parencite{kuo1999,shi2016}:
-
 \begin{equation}
-  \label{eq:2_9}
-  \mathbf{w}(n+1) = \mathbf{w}(n) + \mu\,e(n)\,\mathbf{x}'(n)
+  \label{eq:2_xf_vec}
+  \mathbf{X}_f(n) = \left[x_f(n), x_f(n-1), \ldots, x_f(n-N+1)\right]^T
 \end{equation}
 
 dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $x_f(n)$ : sinyal referensi terfilter (\emph{filtered-x}) pada sampel ke-$n$,
+  \item $\hat{s}_i$ : koefisien ke-$i$ estimasi respons impuls jalur sekunder,
+  \item $M$ : panjang estimasi respons impuls jalur sekunder,
+  \item $x(n-i)$ : sampel sinyal referensi dari mikrofon referensi pada sampel ke-$(n-i)$,
+  \item $\mathbf{X}_f(n)$ : vektor $N$ sampel sinyal referensi terfilter terbaru,
+  \item $N$ : panjang filter adaptif.
+\end{itemize}
+
+Dengan sinyal \emph{error} yang didefinisikan sebagai jumlah \emph{noise} primer dan keluaran jalur sekunder seperti pada Persamaan~\eqref{eq:2_error}, pembaruan koefisien FXLMS dinyatakan sebagai \parencite{zhangrs2023}:
 
 \begin{equation}
-  \label{eq:2_10}
-  \mathbf{x}'(n) = \begin{bmatrix} x'(n) & x'(n-1) & \cdots & x'(n-L+1) \end{bmatrix}^T
+  \label{eq:2_fxlms}
+  \mathbf{W}(n+1) = \mathbf{W}(n) - 2\mu\,e(n)\,\mathbf{X}_f(n)
 \end{equation}
 
-Syarat kestabilan FXLMS secara umum dapat dinyatakan sebagai:
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\mathbf{W}(n)$ : vektor koefisien filter adaptif pada sampel ke-$n$,
+  \item $\mu$ : \emph{step-size} yang bernilai tetap,
+  \item $e(n)$ : sinyal \emph{error} pada Persamaan~\eqref{eq:2_error},
+  \item $\mathbf{X}_f(n)$ : vektor sinyal referensi terfilter pada Persamaan~\eqref{eq:2_xf_vec}.
+\end{itemize}
 
-\begin{equation}
-  \label{eq:2_11}
-  0 < \mu < \frac{2}{L\,P_{x'}}
-\end{equation}
-
-dengan $P_{x'}$ adalah daya sinyal referensi terfilter dan $L$ adalah panjang filter adaptif. Persamaan ini memperlihatkan bahwa nilai $\mu$ yang aman bergantung pada daya sinyal. Bila daya $x'(n)$ meningkat, $\mu$ harus diperkecil agar pembaruan koefisien tetap stabil. Sebaliknya, saat daya sinyal menurun, nilai $\mu$ yang tetap menyebabkan konvergensi menjadi lambat \parencite{cesur2025,kuo1999,pang2024}.
-
-Kelemahan utama FXLMS adalah penggunaan \emph{step-size} tetap. Pada lingkungan dengan variasi level \emph{noise} yang besar, misalnya saat pengguna berpindah dari ruangan sunyi ke lingkungan lalu lintas, FXLMS dapat kehilangan keseimbangan antara kecepatan adaptasi dan kestabilan. Keterbatasan ini dapat diatasi dengan menormalisasi \emph{step-size} terhadap daya sinyal referensi \parencite{cesur2025,pang2024}.
+Tanda negatif pada Persamaan~\eqref{eq:2_fxlms} mengikuti definisi sinyal \emph{error} pada Persamaan~\eqref{eq:2_error} \parencite{zhangrs2023}.
 
 \subsection{Algoritma FXNLMS}
 \label{sec:fxnlms}
 
-Algoritma \emph{Filtered-x Normalized Least Mean Square} (FXNLMS) merupakan pengembangan FXLMS yang menormalisasi \emph{step-size} terhadap daya sinyal referensi terfilter. Tujuannya adalah menjaga besaran pembaruan koefisien tetap proporsional terhadap level sinyal masukan. Dengan demikian, algoritma dapat tetap stabil pada sinyal kuat dan tetap mampu berkonvergensi pada sinyal lemah \parencite{cesur2025,pang2024}.
-
-Pembaruan koefisien FXNLMS dinyatakan sebagai:
+Algoritma \emph{filtered-x normalized least mean square} (FXNLMS) banyak digunakan pada sistem ANC \parencite{pang2024}. Pada FXNLMS, \emph{step-size} dinormalisasi terhadap energi vektor sinyal referensi terfilter \parencite{li2026,sarkar2025}. Dengan konvensi sinyal \emph{error} yang sama dengan Persamaan~\eqref{eq:2_error}, pembaruan koefisien FXNLMS dinyatakan sebagai \parencite{sarkar2025}:
 
 \begin{equation}
-  \label{eq:2_12}
-  \mathbf{w}(n+1) = \mathbf{w}(n) + \frac{\mu}{\hat{P}_{x'}(n) + \varepsilon}\,e(n)\,\mathbf{x}'(n)
+  \label{eq:2_fxnlms}
+  \mathbf{W}(n+1) = \mathbf{W}(n) - \mu\,e(n)\,\frac{\mathbf{X}_f(n)}{\varepsilon + \left\|\mathbf{X}_f(n)\right\|^2}
 \end{equation}
 
-dengan $\hat{P}_{x'}(n)$ adalah estimasi daya sinyal referensi terfilter dan $\varepsilon$ adalah konstanta regularisasi kecil. Konstanta $\varepsilon$ mencegah pembagian dengan nilai mendekati nol ketika sinyal referensi sangat lemah atau senyap. Tanpa $\varepsilon$, pembagian tersebut dapat menghasilkan nilai pembaruan yang sangat besar dan menyebabkan ketidakstabilan numerik \parencite{cesur2025,pang2024}.
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\mu$ : \emph{step-size} sebelum dinormalisasi,
+  \item $\varepsilon$ : konstanta positif kecil ($\varepsilon > 0$) yang mencegah terjadinya pembagian dengan nol,
+  \item $\left\|\mathbf{X}_f(n)\right\|^2$ : kuadrat norma Euclidean vektor sinyal referensi terfilter, yaitu jumlah kuadrat seluruh elemen $\mathbf{X}_f(n)$,
+  \item $\mathbf{W}(n)$, $e(n)$, $\mathbf{X}_f(n)$ : sama seperti pada Persamaan~\eqref{eq:2_fxlms}.
+\end{itemize}
 
-Estimasi daya dapat dilakukan menggunakan metode rekursif:
+Pembaruan FXLMS ternormalisasi disebutkan lebih disukai pada kondisi yang berubah terhadap waktu \parencite{sarkar2025}. Namun, untuk sinyal masukan siklostasioner, kinerja peredaman FXNLMS dipengaruhi oleh daya periodik sinyal masukan sehingga menghasilkan \emph{steady-state mean square deviation} (MSD) yang lebih besar dibandingkan FXLMS \parencite{pang2024}.
+
+Pada algoritma NLMS, faktor normalisasi juga dapat dihitung dari estimasi daya sinyal masukan yang diperbarui secara rekursif \parencite{arezki2017}:
 
 \begin{equation}
-  \label{eq:2_13}
-  \hat{P}_{x'}(n) = \lambda\,\hat{P}_{x'}(n-1) + (1-\lambda)\,x'^2(n)
+  \label{eq:2_power}
+  r(n) = (1-\alpha)\,r(n-1) + \alpha\,x^2(n)
 \end{equation}
 
-dengan $0 < \lambda < 1$ adalah faktor peluruhan. Nilai $\lambda$ yang mendekati 1 menghasilkan estimasi daya yang lebih halus dan stabil, sedangkan nilai $\lambda$ yang lebih kecil membuat estimasi lebih responsif terhadap perubahan sinyal. Metode ini hanya membutuhkan penyimpanan satu nilai daya sebelumnya, sehingga lebih efisien dibanding metode \emph{sliding window} yang harus menyimpan sejumlah sampel sebelumnya \parencite{cesur2025,pang2024}.
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $r(n)$ : estimasi daya sinyal masukan pada sampel ke-$n$,
+  \item $r(n-1)$ : estimasi daya sinyal masukan pada sampel sebelumnya,
+  \item $\alpha$ : faktor peluruhan (\emph{forgetting factor}) yang dapat disesuaikan dengan tingkat ketidakstasioneran sinyal masukan,
+  \item $x(n)$ : sampel sinyal masukan pada sampel ke-$n$.
+\end{itemize}
 
-Dari sisi implementasi FPGA, FXNLMS menambahkan operasi pembagian atau perkalian dengan invers daya. Operasi ini lebih mahal dibanding operasi perkalian dan penjumlahan pada FXLMS. Untuk menghindari pembagi yang besar, dapat digunakan blok \emph{reciprocal}, tabel pencarian, atau metode iteratif seperti Newton-Raphson. Namun, setiap pendekatan menambah kebutuhan sumber daya, latensi, atau kompleksitas kontrol \emph{timing} \parencite{shi2016,klemd2021}.
+Estimasi daya tersebut digunakan pada penguatan adaptasi \parencite{arezki2017}:
+
+\begin{equation}
+  \label{eq:2_gain}
+  \mathbf{g}(n) = \frac{\mu\,\mathbf{X}(n)}{c_0 + N\,r(n)}
+\end{equation}
+
+dengan:
+\begin{itemize}[noitemsep, topsep=2pt]
+  \item $\mathbf{g}(n)$ : vektor penguatan adaptasi yang menggantikan suku $\mu\,\mathbf{X}(n)$ pada pembaruan koefisien,
+  \item $c_0$ : konstanta positif kecil untuk menghindari pembagian dengan nol ketika sinyal masukan tidak ada,
+  \item $N$ : panjang filter adaptif,
+  \item $r(n)$ : estimasi daya sinyal masukan pada Persamaan~\eqref{eq:2_power},
+  \item $\mu$, $\mathbf{X}(n)$ : \emph{step-size} dan vektor sampel masukan.
+\end{itemize}
+
+Dari sisi komputasi, setiap iterasi FXNLMS membutuhkan $3L + M + 1$ operasi perkalian, satu operasi pembagian, dan $3L + M - 3$ operasi penjumlahan, dengan $L$ adalah panjang vektor koefisien filter adaptif (setara dengan $N$ pada persamaan di atas) dan $M$ adalah panjang respons impuls jalur sekunder \parencite{li2026}. Perbandingan kedua algoritma berdasarkan persamaan dan literatur di atas dirangkum pada Tabel~\ref{tab:fxlms_fxnlms}.
 
 \begin{table}[H]
   \centering
@@ -207,145 +314,30 @@ Dari sisi implementasi FPGA, FXNLMS menambahkan operasi pembagian atau perkalian
   \hline
   \textbf{Aspek} & \textbf{FXLMS} & \textbf{FXNLMS} \\
   \hline
-  \emph{Step-size} efektif & Tetap, $\mu$ & Dinormalisasi, $\mu$ / ($\hat{P}_{x'}$ + $\varepsilon$) \\
+  Pembaruan koefisien & Persamaan~\eqref{eq:2_fxlms} \parencite{zhangrs2023} & Persamaan~\eqref{eq:2_fxnlms} \parencite{sarkar2025} \\
   \hline
-  Operasi utama & Perkalian dan akumulasi & Perkalian, akumulasi, estimasi daya, dan pembagian \\
+  \emph{Step-size} & Tetap, $\mu$ & $\mu / (\varepsilon + \|\mathbf{X}_f(n)\|^2)$, mengikuti energi sinyal referensi terfilter \\
   \hline
-  Konvergensi & Bergantung pada daya $x'(n)$ & Lebih konsisten terhadap variasi daya sinyal \\
+  Operasi pembagian per iterasi & Tidak ada & Satu \parencite{li2026} \\
   \hline
-  Kestabilan & Perlu $\mu$ kecil saat daya \emph{input} besar & Lebih \emph{robust} terhadap perubahan level \emph{input} \\
-  \hline
-  Kompleksitas FPGA & Lebih rendah & Lebih tinggi karena pembagi atau blok \emph{reciprocal} \\
-  \hline
-  Kelemahan & Lambat saat sinyal lemah, berisiko tidak stabil saat sinyal kuat & Biaya komputasi dan konsumsi sumber daya lebih besar \\
+  Catatan dari literatur & Algoritma yang paling banyak digunakan pada ANC \parencite{klemd2021} & Lebih disukai pada kondisi yang berubah terhadap waktu \parencite{sarkar2025}; MSD tunak lebih besar daripada FXLMS untuk masukan siklostasioner \parencite{pang2024} \\
   \hline
   \end{tabular}
 \end{table}
 
-\subsection{Representasi \emph{Fixed-Point}}
-\label{sec:fixedpoint}
-
-Implementasi FPGA untuk pemrosesan audio dan filter adaptif umumnya menggunakan aritmetika \emph{fixed-point} karena lebih hemat sumber daya, memiliki latensi rendah, dan dapat dipetakan langsung ke DSP \emph{slice}. Format \emph{fixed-point} yang umum digunakan adalah Q$m.n$, dengan $m$ bit bagian integer, $n$ bit bagian fraksi, dan biasanya satu bit tanda. Total \emph{wordlength} adalah:
-
-\begin{equation}
-  \label{eq:2_14}
-  B = m + n + 1
-\end{equation}
-
-Sebagai contoh, format Q1.15 menggunakan satu bit tanda dan 15 bit fraksi, sehingga rentang nilai yang dapat direpresentasikan adalah \parencite{klemd2021,ji2025}:
-
-\begin{equation}
-  \label{eq:2_15}
-  -1 \le x \le 1 - 2^{-15}
-\end{equation}
-
-Proses kuantisasi menyebabkan galat karena nilai kontinu atau hasil perhitungan harus dibulatkan atau dipotong agar sesuai dengan jumlah bit yang tersedia. Galat ini muncul pada sampel audio dari I2S, koefisien filter, hasil perkalian DSP, hasil akumulasi MAC, dan nilai daya pada FXNLMS. Semakin kecil \emph{wordlength}, semakin besar galat kuantisasi dan semakin besar potensi penurunan kualitas reduksi \emph{noise} \parencite{shi2016,ji2025}.
-
-\emph{Overflow} terjadi apabila hasil operasi melebihi rentang representasi \emph{fixed-point}. Pada sistem audio, \emph{overflow} dapat menimbulkan distorsi keras atau \emph{clipping}. Salah satu penanganan yang umum adalah \emph{saturation}, yaitu membatasi hasil operasi pada nilai maksimum atau minimum yang dapat direpresentasikan. Selain itu, \emph{scaling} dapat diterapkan pada koefisien, sinyal masukan, atau hasil \emph{intermediate} agar nilai tetap berada dalam rentang aman \parencite{klemd2021,ji2025}.
-
-Pada filter adaptif, presisi terbatas memiliki dampak yang lebih serius dibanding filter statis. Pertama, galat kuantisasi pada $e(n)$, $x'(n)$, dan $\mu$ menyebabkan arah pembaruan koefisien menjadi tidak sempurna. Kedua, jika nilai $\mu\,e(n)\,x'(n)$ lebih kecil daripada resolusi koefisien, hasil penjumlahan tidak mengubah nilai koefisien. Kondisi ini disebut \emph{coefficient stalling} atau berhentinya pembaruan koefisien. Akibatnya, filter tidak dapat mencapai solusi optimum meskipun secara matematis algoritma seharusnya masih beradaptasi \parencite{shi2016,klemd2021}.
-
-% Pada FPGA seperti Artix-7, DSP \emph{slice} dioptimasi untuk operasi MAC \emph{fixed-point}. Aritmetika \emph{floating-point} membutuhkan lebih banyak LUT, register, dan \emph{pipeline} sehingga penggunaan sumber daya dan konsumsi dayanya lebih besar dibanding \emph{fixed-point} \parencite{klemd2021,ji2025,amd_ds181}.
-
 \subsection{\emph{Field-Programmable Gate Array} (FPGA)}
 \label{sec:fpga}
 
-\emph{Field-Programmable Gate Array} (FPGA) adalah perangkat logika \emph{programmable} yang dapat dikonfigurasi ulang untuk membentuk rangkaian digital sesuai kebutuhan. Berbeda dengan mikrokontroler yang mengeksekusi instruksi secara berurutan, FPGA dapat menjalankan banyak operasi secara paralel. Karakteristik ini sangat sesuai untuk filter FIR, konvolusi, pembaruan LMS, dan antarmuka I2S yang harus diproses dalam satu periode \emph{sampling} \parencite{shi2016,ji2025}.
+\emph{Field-Programmable Gate Array} (FPGA) adalah perangkat terfabrikasi yang dapat diprogram secara elektris untuk menjadi hampir semua jenis rangkaian atau sistem digital. FPGA tersusun atas larik blok logika yang dapat diprogram, yang dikelilingi oleh jaringan \emph{routing} dan blok I/O yang juga dapat diprogram \parencite{kuon2008}. Pada FPGA berbasis SRAM, konfigurasi bersifat \emph{volatile} sehingga harus dimuat ulang setiap kali FPGA dinyalakan \parencite{kuon2008,amd_ds180}.
 
-Elemen dasar FPGA meliputi:
+Sumber daya logika FPGA dibentuk oleh \emph{lookup table} (LUT) dan \emph{flip-flop}. Pada FPGA 7 series, empat LUT 6 masukan beserta delapan \emph{flip-flop} dan logika \emph{carry} membentuk satu \emph{slice} \parencite{amd_ds180}. Selain itu, FPGA dilengkapi blok khusus (\emph{hard block}) seperti memori dan pengali, yang umumnya lebih unggul dalam luas area, kecepatan, dan konsumsi daya dibandingkan fungsi yang sama pada logika serbaguna \parencite{kuon2008}. Pada FPGA 7 series, blok khusus tersebut meliputi \emph{block RAM} \emph{dual-port} 36 Kb dan DSP \emph{slice} yang terdiri atas pengali \emph{two's complement} 25 $\times$ 18 bit dan akumulator 48 bit dengan kemampuan \emph{pipelining} \parencite{amd_ds180}.
 
-\begin{enumerate}
-  \item \emph{Look-Up Table} (LUT): mengimplementasikan fungsi logika kombinasional seperti \emph{multiplexer}, \emph{adder}, \emph{comparator}, dan kontrol \emph{finite-state machine}.
-  \item \emph{Flip-Flop}: menyimpan satu bit data pada tepi \emph{clock} dan membentuk register, \emph{counter}, serta \emph{pipeline}.
-  \item DSP \emph{slice}: melakukan operasi \emph{multiply-accumulate} (MAC) secara efisien untuk filter FIR, konvolusi, dan pembaruan adaptif.
-  \item \emph{Block RAM} (BRAM): menyimpan \emph{delay line} filter, koefisien adaptif, \emph{buffer} I2S, dan data internal lainnya \parencite{amd_ds181,digilent_arty}.
-\end{enumerate}
+Pemrosesan algoritma FXLMS ditandai oleh banyaknya operasi \emph{multiply-accumulate} (MAC) yang harus diselesaikan dalam setiap periode sampel. Daya komputasi menjadi kriteria terpenting untuk memungkinkan filter berorde tinggi yang dikombinasikan dengan frekuensi \emph{sampling} yang tinggi \parencite{klemd2023}. Kesesuaian suatu teknologi implementasi untuk ANC terutama ditentukan oleh daya pemrosesan, disertai \emph{delay} pemrosesan dan efisiensi energi, dan kinerja ANC juga dapat meningkat dengan tambahan daya komputasi \parencite{klemd2023}.
 
-% Artix-7 XC7A35T, yang terdapat pada \emph{board} Arty A7-35T, memiliki 5.200 \emph{slice}, 41.600 \emph{flip-flop}, 1.800 Kbit \emph{block RAM}, dan 90 DSP \emph{slice}. Setiap \emph{slice} terdiri atas empat LUT enam-\emph{input} dan delapan \emph{flip-flop} \parencite{amd_ds181,digilent_arty}.
+Selain daya komputasi, sistem ANC membutuhkan \emph{delay} pemrosesan yang kecil karena waktu yang tersedia untuk meredam \emph{noise} secara aktif terbatas \parencite{klemd2023}. Keterbatasan waktu ini berkaitan langsung dengan kendala kausalitas ANC \emph{feedforward} pada Subbab~\ref{sec:anc}, yaitu total \emph{delay} jalur sekunder harus lebih kecil daripada \emph{delay} jalur primer \parencite{zhangqiu2014}. Pada perangkat berukuran kecil seperti \emph{headphone}, \emph{delay} akustik antara mikrofon referensi dan mikrofon \emph{error} lebih pendek, sehingga jendela waktu pemrosesan semakin terbatas \parencite{shi2023anc}.
 
-DSP \emph{slice} menjadi komponen utama dalam implementasi filter adaptif karena operasi FXLMS didominasi oleh perkalian koefisien dengan sampel sinyal dan akumulasi hasil perkalian. BRAM digunakan untuk menyimpan \emph{delay line} $x(n)$ dan $x'(n)$, sedangkan register \emph{flip-flop} menyimpan koefisien $w(n)$, sinyal \emph{error}, dan sinyal kendali \emph{pipeline}. Pembagian pada FXNLMS dapat diimplementasikan menggunakan LUT, blok \emph{reciprocal}, atau modul pembagi yang di-\emph{pipeline} \parencite{shi2016,klemd2021}.
+FPGA memiliki beberapa karakteristik yang menjawab kebutuhan tersebut. Pertama, pada logika FPGA, sampel audio dari antarmuka A/D dapat langsung diproses oleh gerbang dan register, sehingga \emph{overhead} manajemen pada prosesor serbaguna atau sistem operasi dapat dihindari dan \emph{delay} pemrosesan menjadi lebih kecil. Kedua, FPGA lebih dipilih untuk algoritma aritmetika sederhana yang sesuai untuk dieksekusi secara paralel. Ketiga, jalur data (\emph{datapath}) pada FPGA dapat disesuaikan pada tingkat \emph{register-transfer level} (RTL), yaitu tingkat abstraksi yang lebih rendah daripada urutan instruksi perangkat lunak pada prosesor DSP, sehingga optimasi dapat dilakukan lebih jauh \parencite{klemd2023}. Keempat, operasi perkalian dan akumulasi yang mendominasi FXLMS dapat dipetakan ke DSP \emph{slice} yang memang dirancang sebagai pengali dan akumulator khusus dengan dukungan \emph{pipelining} \parencite{amd_ds180}, sehingga memperoleh keunggulan blok khusus dalam luas area, kecepatan, dan konsumsi daya \parencite{kuon2008}.
 
-Alur perancangan HDL dimulai dengan penulisan deskripsi perangkat keras menggunakan VHDL atau Verilog. Desain kemudian diverifikasi melalui \emph{testbench} dan simulasi fungsional untuk memastikan keluaran sesuai spesifikasi. Setelah itu, desain disintesis menggunakan Vivado untuk menghasilkan \emph{netlist} logika, dilanjutkan dengan implementasi, analisis \emph{timing}, dan pembangkitan \emph{bitstream}. Pada sistem ANC, \emph{timing closure} sangat penting karena seluruh jalur pemrosesan harus selesai sebelum batas satu periode \emph{sampling} terlampaui \parencite{klemd2021,ji2025}.
+Pada prosesor DSP, utilisasi perangkat keras aritmetika per siklus \emph{clock} dapat menurun secara signifikan ketika pembaruan koefisien harus ditangani bersamaan dengan proses konvolusi \parencite{klemd2023}. Pada FXLMS dan FXNLMS, kedua proses tersebut dilakukan pada setiap sampel, yaitu perhitungan keluaran filter pada Persamaan~\eqref{eq:2_fir} dan pembaruan koefisien pada Persamaan~\eqref{eq:2_fxlms} dan \eqref{eq:2_fxnlms}. Klemd juga mengutip hasil penelitian yang menunjukkan bahwa rancangan FPGA yang diparalelkan pada frekuensi 100 MHz dapat melampaui prosesor DSP 1,5 GHz dengan percepatan 12,3 kali dan konsumsi daya sekitar 2,4 kali lebih rendah pada teknologi proses yang sama \parencite{klemd2023}.
 
-\subsection{Antarmuka Audio I2S}
-\label{sec:i2s}
-
-\emph{Inter-IC Sound} (I2S) adalah standar bus serial yang dikembangkan oleh Philips Semiconductors untuk mentransfer data audio digital dalam format \emph{Pulse Code Modulation} (PCM) antar-IC di dalam satu perangkat, misalnya antara mikrofon digital, prosesor, dan DAC. I2S memisahkan sinyal \emph{clock} dari sinyal data, sehingga penerima tidak perlu memulihkan \emph{clock} dari aliran data dan rangkaian penerima menjadi lebih sederhana \parencite{philips_i2s}. Bus I2S terdiri atas tiga jalur utama:
-
-\begin{enumerate}
-  \item SCK (\emph{serial clock}), disebut juga BCLK (\emph{bit clock}): sinyal \emph{clock} yang menyinkronkan setiap bit data. Satu bit data dikirim pada setiap periode SCK.
-  \item WS (\emph{word select}), disebut juga LRCLK (\emph{left-right clock}): sinyal yang menunjukkan kanal dari data yang sedang dikirim. WS bernilai 0 untuk kanal kiri dan 1 untuk kanal kanan, sehingga frekuensi WS sama dengan frekuensi \emph{sampling} $f_s$.
-  \item SD (\emph{serial data}), disebut juga DOUT/DIN: jalur yang membawa sampel audio secara serial, bergantian antara kanal kiri dan kanal kanan \parencite{philips_i2s,pinardi2022}.
-\end{enumerate}
-
-Selain ketiga jalur tersebut, banyak perangkat audio menggunakan jalur tambahan MCLK (\emph{master clock}) dengan frekuensi kelipatan $f_s$, umumnya $256 f_s$, sebagai \emph{clock} sistem untuk rangkaian konversi internalnya. Jalur ini tidak termasuk dalam spesifikasi dasar I2S dan bersifat opsional bergantung pada perangkat yang digunakan \parencite{ti_pcm5102a}.
-
-Pada bus I2S, perangkat yang membangkitkan sinyal SCK dan WS disebut \emph{master}, sedangkan perangkat yang mengikuti kedua sinyal tersebut disebut \emph{slave}. Peran \emph{master} dapat dipegang oleh pemancar, penerima, atau pengendali terpisah yang mengatur keduanya. Dengan demikian, seluruh perangkat pada satu bus bekerja dengan acuan waktu yang sama \parencite{philips_i2s}.
-
-Data audio pada I2S dikirim dalam format \emph{two's complement} dengan bit paling signifikan (\emph{most significant bit}, MSB) terlebih dahulu. Urutan MSB terlebih dahulu memungkinkan pemancar dan penerima memiliki panjang \emph{word} yang berbeda. Jika penerima menerima bit lebih banyak daripada kapasitasnya, bit yang paling tidak signifikan (\emph{least significant bit}, LSB) diabaikan. Sebaliknya, jika bit yang diterima lebih sedikit, bit sisanya diisi dengan nol. Dengan cara ini, nilai sampel tetap terbaca dengan benar meskipun resolusinya berbeda \parencite{philips_i2s}.
-
-Pemancar mengubah data pada tepi turun SCK, sedangkan penerima mengambil data pada tepi naik SCK. Sinyal WS berubah satu periode SCK sebelum MSB dikirim, sehingga MSB suatu kanal muncul pada siklus SCK kedua setelah transisi WS. Penundaan satu bit ini memberi waktu bagi penerima untuk menyimpan \emph{word} sebelumnya dan bersiap menerima \emph{word} berikutnya \parencite{philips_i2s}. Hubungan pewaktuan antara SCK, WS, dan SD ditunjukkan pada Gambar~\ref{fig:i2s_timing}.
-
-\begin{figure}[H]
-  \centering
-  \begin{tikzpicture}[x=0.85cm, y=0.5cm, font=\scriptsize]
-    % Label sinyal
-    \node[left] at (0,4.5) {SCK};
-    \node[left] at (0,2.5) {WS};
-    \node[left] at (0,0.5) {SD};
-    % SCK
-    \foreach \k in {0,...,12} {
-      \draw (\k,4) -- (\k+0.5,4) -- (\k+0.5,5) -- (\k+1,5) -- (\k+1,4);
-    }
-    % WS
-    \draw (0,3) -- (1,3) -- (1,2) -- (9,2) -- (9,3) -- (13,3);
-    \node at (5,2.5) {kanal kiri (WS = 0)};
-    \node at (11,2.5) {kanan (WS = 1)};
-    % SD
-    \draw (0,1) -- (0.9,1) (0,0) -- (0.9,0);
-    \foreach \k in {1,...,12} {
-      \draw (\k-0.1,0) -- (\k+0.1,1) (\k-0.1,1) -- (\k+0.1,0);
-      \draw (\k+0.1,1) -- (\k+0.9,1) (\k+0.1,0) -- (\k+0.9,0);
-    }
-    \draw (12.9,0) -- (13,0) (12.9,1) -- (13,1);
-    \foreach \k/\lbl in {0/$\cdots$, 1/LSB, 2/MSB, 5/$\cdots$, 9/LSB, 10/MSB, 12/$\cdots$} {
-      \node at (\k+0.5,0.5) {\lbl};
-    }
-    % Penundaan satu bit
-    \draw[dashed, gray] (1,5.3) -- (1,-0.4) (2,5.3) -- (2,-0.4);
-    \draw[<->] (1,-0.8) -- (2,-0.8) node[midway, below] {1 periode SCK};
-  \end{tikzpicture}
-  \caption{Diagram pewaktuan protokol I2S}
-  \label{fig:i2s_timing}
-\end{figure}
-
-Satu periode WS disebut satu \emph{frame} dan berisi satu sampel kanal kiri dan satu sampel kanal kanan. Frekuensi SCK yang dibutuhkan bergantung pada frekuensi \emph{sampling}, jumlah kanal, dan jumlah bit tiap kanal:
-
-\begin{equation}
-  \label{eq:2_sck}
-  f_{\text{SCK}} = f_s \times N_{\text{kanal}} \times N_{\text{bit}}
-\end{equation}
-
-dengan $N_{\text{kanal}}$ adalah jumlah kanal dalam satu \emph{frame} dan $N_{\text{bit}}$ adalah jumlah slot bit tiap kanal. Sebagai contoh, pada $f_s = 48~\mathrm{kHz}$ dengan dua kanal dan slot 32 bit per kanal, diperlukan $f_{\text{SCK}} = 48~\mathrm{kHz} \times 2 \times 32 = 3{,}072~\mathrm{MHz}$ \parencite{philips_i2s}.
-
-Selain format I2S standar (format Philips), terdapat beberapa varian format serial audio. Pada format \emph{left-justified}, MSB dikirim tepat saat WS berubah tanpa penundaan satu bit. Pada format \emph{right-justified}, LSB diletakkan tepat di akhir setiap kanal sehingga posisi MSB bergantung pada panjang \emph{word}. Untuk lebih dari dua kanal, digunakan format \emph{Time-Division Multiplexing} (TDM) yang menempatkan beberapa kanal secara berurutan dalam satu \emph{frame}. Pemancar dan penerima pada satu bus harus dikonfigurasi dengan format yang sama agar data terbaca dengan benar \parencite{pinardi2022,ti_pcm5102a}.
-
-Contoh perangkat yang menggunakan antarmuka I2S adalah mikrofon MEMS digital INMP441 dan DAC audio PCM5102A. INMP441 bekerja sebagai \emph{slave} dan mengeluarkan data PCM 24-bit dalam format \emph{two's complement} dengan frekuensi \emph{sampling} sekitar 8 kHz hingga 48 kHz. Setiap \emph{frame} INMP441 terdiri atas 64 siklus SCK, yaitu 32 siklus per kanal. Pin L/R pada INMP441 menentukan kanal tempat mikrofon mengirimkan data, sedangkan selama kanal lainnya keluaran SD berada pada kondisi impedansi tinggi, sehingga dua mikrofon dapat berbagi satu jalur SD sebagai pasangan stereo \parencite{invensense_inmp441}. PCM5102A merupakan DAC yang menerima data I2S atau \emph{left-justified} dengan panjang \emph{word} 16, 24, atau 32 bit. PCM5102A juga memiliki PLL internal yang dapat membangkitkan \emph{clock} sistem dari SCK, sehingga dapat beroperasi tanpa jalur MCLK \parencite{ti_pcm5102a}.
-
-Frekuensi \emph{sampling} menentukan waktu yang tersedia untuk memproses satu sampel. Periode \emph{sampling} adalah:
-
-\begin{equation}
-  \label{eq:2_16}
-  T_s = \frac{1}{f_s}
-\end{equation}
-
-Pada $f_s = 48~\mathrm{kHz}$, periode \emph{sampling} adalah sekitar $20{,}83~\mu\mathrm{s}$. Seluruh proses, termasuk penerimaan data I2S dari mikrofon, pemrosesan filter FIR, pembaruan koefisien adaptif, dan pengiriman data ke DAC, harus selesai dalam waktu tersebut agar sistem tetap \emph{real-time} \parencite{shi2016,invensense_inmp441,ti_pcm5102a}.
-
-Latensi total sistem dapat dinyatakan sebagai:
-
-\begin{equation}
-  \label{eq:2_17}
-  T_{\text{latency}} \approx T_{\text{I2S}} + T_{\text{FIR}} + T_{\text{adaptif}} + T_{\text{DAC}}
-\end{equation}
-
-Latensi ini harus lebih kecil daripada waktu rambat akustik dari mikrofon referensi di luar \emph{earcup} ke mikrofon \emph{error} di dalam \emph{earcup}. Jika tidak, \emph{anti-noise} tiba terlambat dan interferensi destruktif tidak optimal. Oleh karena itu, implementasi FPGA dengan arsitektur paralel dan \emph{pipelined} menjadi penting untuk memenuhi kendala kausalitas \emph{feedforward} ANC \parencite{kuo1999,shi2016,miyake2023}.
+Keunggulan tersebut terlihat pada hasil penelitian Klemd. Implementasi FXLMS \emph{feedback} pada FPGA mencapai \emph{delay} pemrosesan yang pendek dan tidak bergantung pada panjang filter. Pada konfigurasi paling berat, yaitu 11 sensor \emph{error}, 11 sumber sekunder, orde filter 2049, dan frekuensi \emph{sampling} 48 kHz, \emph{delay} yang dicapai jauh di bawah 1 $\mu$s dengan tambahan peredaman hingga 12 dB dibandingkan implementasi perangkat lunak acuan \parencite{klemd2023}. Arsitektur FXLMS pada FPGA juga dapat diparameterisasi untuk diarahkan pada kinerja tinggi maupun efisiensi sumber daya \parencite{klemd2021}.

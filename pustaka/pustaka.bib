@@ -79,7 +79,7 @@
   address   = {Dublin, Ireland},
   pages     = {319--326},
   year      = {2021},
-  doi       = {10.1109/FPL53798.2021.00057}
+  doi       = {10.1109/FPL53798.2021.00063}
 }
 
 @article{ji2025,
@@ -103,13 +103,6 @@
   doi     = {10.1109/ACCESS.2024.3368860}
 }
 
-@manual{amd_ds181,
-  author       = {{AMD}},
-  title        = {Artix-7 {FPGA} Data Sheet: {DC} and {AC} Switching Characteristics ({DS181})},
-  organization = {AMD/Xilinx},
-  year         = {2024},
-  url          = {https://docs.amd.com/r/en-US/ds181-Artix-7-Data-Sheet}
-}
 
 @manual{digilent_arty,
   author       = {{Digilent}},
@@ -132,17 +125,18 @@
 
 @manual{invensense_inmp441,
   author       = {{InvenSense}},
-  title        = {{INMP441} Omnidirectional Microphone with {I2S} Digital Output: Product Specification},
-  organization = {InvenSense/TDK},
-  year         = {2016},
+  title        = {{INMP441} Omnidirectional Microphone with {I2S} Digital Output: Product Specification, Rev. 1.1},
+  organization = {InvenSense Inc.},
+  year         = {2014},
   url          = {https://invensense.tdk.com/products/inmp441/}
 }
 
 @manual{ti_pcm5102a,
   author       = {{Texas Instruments}},
-  title        = {{PCM5102A} 2{VRMS} {DirectPath} Stereo Audio {DAC} with 112/106-{dB} {SNR} and Negative Charge Pump: Datasheet},
+  title        = {{PCM510xA} 2.1 {VRMS}, 112/106/100 {dB} Audio Stereo {DAC} with {PLL} and 32-bit, 384 {kHz} {PCM} Interface},
   organization = {Texas Instruments},
   year         = {2015},
+  note         = {Product page and data sheet SLAS859C, May 2015},
   url          = {https://www.ti.com/product/PCM5102A}
 }
 
@@ -151,5 +145,145 @@
   title        = {{I2S} Bus Specification},
   organization = {Philips Semiconductors},
   year         = {1996},
-  note         = {Revisi Juni 1996}
+  note         = {February 1986, revised June 5, 1996}
+}
+
+@misc{shi2023anc,
+  author       = {Shi, Dongyuan and Lam, Bhan and Gan, Woon-Seng and Cheer, Jordan and Elliott, Stephen J.},
+  title        = {Active Noise Control in The New Century: The Role and Prospect of Signal Processing},
+  year         = {2023},
+  eprint       = {2306.01425},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2306.01425}
+}
+
+@thesis{zhangrs2023,
+  author       = {Zhang, Runsheng},
+  title        = {Investigation and Evaluation of Adaptive Algorithms for Multichannel Active Noise Control System},
+  type         = {M.Sc. dissertation},
+  institution  = {School of Electrical and Electronic Engineering, Nanyang Technological University},
+  address      = {Singapore},
+  year         = {2023},
+  eprint       = {2308.15485},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2308.15485}
+}
+
+@article{zhangqiu2014,
+  author       = {Zhang, L. and Qiu, X.},
+  title        = {Causality study on a feedforward active noise control headset with different noise coming directions in free field},
+  journal      = {Applied Acoustics},
+  volume       = {80},
+  pages        = {36--44},
+  year         = {2014},
+  doi          = {10.1016/j.apacoust.2014.01.004}
+}
+
+@misc{sarkar2025,
+  author       = {Sarkar, Kanad and Lu, Austin and Mittal, Manan and Zhuang, Yongjie and Corey, Ryan M. and Singer, Andrew C.},
+  title        = {Latent {FxLMS}: Accelerating Active Noise Control with Neural Adaptive Filters},
+  year         = {2025},
+  eprint       = {2507.03854},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2507.03854}
+}
+
+@misc{li2026,
+  author       = {Li, Zhiyuan and Yu, Yi and He, Hongsen and Zhu, Yuyu and de Lamare, Rodrigo C.},
+  title        = {Study of Switched Step-size Based Filtered-x {NLMS} Algorithm for Active Noise Cancellation},
+  year         = {2026},
+  eprint       = {2601.16382},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2601.16382}
+}
+
+@inproceedings{arezki2017,
+  author       = {Arezki, M. and Namane, A. and Benallal, A.},
+  title        = {Performance Analysis of the Fast-{NLMS} type Algorithm},
+  booktitle    = {Proceedings of the World Congress on Engineering 2017 (WCE 2017)},
+  volume       = {I},
+  address      = {London, U.K.},
+  pages        = {460--463},
+  year         = {2017}
+}
+
+@misc{shahdoosti2018,
+  author       = {Shahdoosti, Hamid Reza},
+  title        = {A New Noise-Assistant {LMS} Algorithm for Preventing the Stalling Effect},
+  year         = {2018},
+  eprint       = {1807.07395},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/1807.07395}
+}
+
+@manual{yates2001,
+  author       = {Yates, Randy},
+  title        = {Fixed-Point Arithmetic: An Introduction},
+  organization = {Digital Signal Labs},
+  year         = {2001},
+  note         = {Technical Reference, March 3, 2001}
+}
+
+@manual{amd_ds180,
+  author       = {{AMD/Xilinx}},
+  title        = {7 Series {FPGAs} Data Sheet: Overview ({DS180}), v2.6.1},
+  year         = {2020},
+  note         = {September 8, 2020}
+}
+
+@manual{amd_ug892,
+  author       = {{AMD}},
+  title        = {Vivado Design Suite User Guide: Design Flows Overview ({UG892}), v2024.2},
+  year         = {2024},
+  url          = {https://docs.amd.com/r/2024.2-English/ug892-vivado-design-flows-overview}
+}
+
+@article{kuon2008,
+  author  = {Kuon, Ian and Tessier, Russell and Rose, Jonathan},
+  title   = {{FPGA} Architecture: Survey and Challenges},
+  journal = {Foundations and Trends in Electronic Design Automation},
+  volume  = {2},
+  number  = {2},
+  pages   = {135--253},
+  year    = {2008},
+  doi     = {10.1561/1000000005}
+}
+
+@phdthesis{klemd2023,
+  author      = {Klemd, Alexander Georg},
+  title       = {Hardware Acceleration of Active Noise Control Algorithms},
+  type        = {Dissertation (Dr.-Ing.)},
+  institution = {Helmut-Schmidt-Universit{\"a}t / Universit{\"a}t der Bundeswehr Hamburg},
+  address     = {Hamburg, Germany},
+  year        = {2023},
+  doi         = {10.24405/15013}
+}
+
+@dataset{demand2013,
+  author    = {Thiemann, Joachim and Ito, Nobutaka and Vincent, Emmanuel},
+  title     = {{DEMAND}: a collection of multi-channel recordings of acoustic noise in diverse environments},
+  publisher = {Zenodo},
+  version   = {1.0},
+  year      = {2013},
+  doi       = {10.5281/zenodo.1227121},
+  url       = {https://zenodo.org/records/1227121}
+}
+
+@inproceedings{dean2010qutnoise,
+  author    = {Dean, David and Sridharan, Sridha and Vogt, Robert and Mason, Michael},
+  title     = {The {QUT-NOISE-TIMIT} Corpus for the Evaluation of Voice Activity Detection Algorithms},
+  booktitle = {Proceedings of INTERSPEECH 2010},
+  address   = {Makuhari, Japan},
+  pages     = {3110--3113},
+  year      = {2010},
+  doi       = {10.21437/Interspeech.2010-774}
+}
+
+@misc{snyder2015musan,
+  author     = {Snyder, David and Chen, Guoguo and Povey, Daniel},
+  title      = {{MUSAN}: A Music, Speech, and Noise Corpus},
+  year       = {2015},
+  eprint     = {1510.08484},
+  eprinttype = {arXiv},
+  url        = {https://www.openslr.org/17/}
 }
